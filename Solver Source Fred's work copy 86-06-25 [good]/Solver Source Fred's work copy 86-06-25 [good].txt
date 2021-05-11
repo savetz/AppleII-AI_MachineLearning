@@ -1,0 +1,3400 @@
+-------------------------------------------- SCREEN 000
+( SOLVER LOAD BLOCK      < 6/26/86>140) 
+                                        
+                                        
+                                        
+  141 241 THRU  \ MAIN SOLVER           
+  242 249 THRU  \ lloyd's SOLVE         
+  262 267 THRU  \ Fred's Print words    
+                                        
+                                        
+\ 275 278 THRU  \ TEST WORDS            
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 001
+( CONSTANTS              < 7/ 8/86>141) 
+                                        
+4 ' WIDTH !                             
+\ FORGET THESE WHEN DONE LOADING VIR    
+ 2 CONSTANT KIND    4 CONSTANT NUM      
+ 6 CONSTANT DENOM   8 CONSTANT VAROP    
+10 CONSTANT PRED   12 CONSTANT L/R      
+14 CONSTANT LT     16 CONSTANT RT       
+18 CONSTANT PAR    20 CONSTANT PL/R     
+ 1 CONSTANT CON     2 CONSTANT VAR      
+ 3 CONSTANT OP                          
+                                        
+                                        
+CREATE NODES 684 ALLOT                  
+                                        
+22 CONSTANT LEN                         
+29 CONSTANT NODE#MAX                    
+                                        
+EXIT ***** REMOVED 7-8-86 *****         
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 002
+( @ AND ! OPERATORS      < 6/26/86>142) 
+                                        
+: GET   CREATE C, DOES> C@ + @ ;        
+                                        
+: PUT CREATE  C, DOES> C@ + ! ;         
+                                        
+KIND  GET @KIND   KIND   PUT !KIND      
+NUM   GET @NUM    NUM    PUT !NUM       
+DENOM GET @DENOM  DENOM  PUT !DENOM     
+VAROP GET @VAROP  VAROP  PUT !VAROP     
+LT    GET @LT     LT     PUT !LT        
+RT    GET @RT     RT     PUT !RT        
+PRED  GET @PRED   PRED   PUT !PRED      
+L/R   GET @L/R    L/R    PUT !L/R       
+PAR   GET @PAR    PAR    PUT !PAR       
+PL/R  GET @PL/R   PL/R   PUT !PL/R      
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 003
+( MORE CONSTANTS         < 6/26/86>143) 
+                                        
+  126 CONSTANT NEG                      
+  124 CONSTANT ABS#                     
+   20 CONSTANT HIGHVAL                  
+    0 CONSTANT LEFT                     
+    1 CONSTANT RIGHT                    
+    0 CONSTANT NUL                      
+    0 CONSTANT <*GO>                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 004
+( DATA ARRAYS  !NSTACK   < 6/26/86>144) 
+                                        
+VARIABLE NPOINT                         
+VARIABLE ROOT                           
+                                        
+CREATE NSTACK         52 ALLOT          
+CREATE VARNAME        52 ALLOT          
+CREATE NONPLUS        32 ALLOT          
+                                        
+: !NSTACK   ( node-adr -- )             
+     NPOINT @  DUP 0 >=                 
+     IF                                 
+       NSTACK + !                       
+     ELSE                               
+       CR ." TRY TO STORE - IN NSTACK"  
+       R> U. R> U. QUIT                 
+     THEN ;                             
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 005
+( VARIABLES              < 7/ 8/86>145) 
+                                        
+VARIABLE NEW-NODE   VARIABLE CUR-NODE   
+VARIABLE #PAR       VARIABLE NUM-SAVE   
+VARIABLE DENOM-SAVE                     
+VARIABLE OP-SAVE    VARIABLE RDIST<-OK  
+VARIABLE DIST<-OK   VARIABLE L-DENOM    
+VARIABLE LDIST<-OK  VARIABLE ?MUL       
+VARIABLE ?DIST<     VARIABLE ?CLT       
+VARIABLE ?TCOMB     VARIABLE L-KIND     
+VARIABLE <?COMB>    VARIABLE ?CM        
+VARIABLE DENOM-R    VARIABLE KIND-R     
+VARIABLE NUM-R                          
+VARIABLE L-NUM      VARIABLE L-R        
+VARIABLE RT-LEAF                        
+EXIT                                    
+\ The following will be set by          
+\ the input routine and parser          
+\ 0 CONSTANT VARNUL \ HOLDS XVAR OR NUL 
+\ 0 CONSTANT $NUM   \ HOLDS USER NUM    
+\ 0 CONSTANT $DENOM \ HOLDS USER DENOM  
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 006
+( VARIABLES cont.        < 7/ 8/86>146) 
+                                        
+VARIABLE RT-NODE  VARIABLE ?DEL-NEG     
+VARIABLE #VAR                           
+VARIABLE CONFLAG  VARIABLE CONPLACE     
+VARIABLE #NONPLUS VARIABLE VCOUNT       
+VARIABLE FOUND    VARIABLE IGNORE-SUC   
+VARIABLE SUBROOT                        
+VARIABLE RT-SAVE  VARIABLE CANCELS      
+VARIABLE SOLVED                         
+                                        
+EXIT ***** REMOVED 7-8-86 *****         
+                                        
+VARIABLE PNODE                          
+VARIABLE ABS-RT-CHILD                   
+VARIABLE NUM-NODES                      
+VARIABLE TPTR                           
+VARIABLE #NODE                          
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 007
+( ADDR +-RAN RANDSIGN +  < 7/ 8/86>147) 
+NODES 682 NUL FILL                      
+: ADDR \ node# ---> add                 
+   LEN * NODES + ;                      
+                                        
+: LT-#NUL     NUL SWAP !LT ;            
+: P/M \ N1 N2 C --> <N1+N2> <N1-N2>     
+   PLUS = IF + ELSE - THEN ;            
+\ NODE ADDRESS --> *                    
+: DELNODE   LEN NUL FILL ;              
+: NUM@  ADDR @NUM ;                     
+: NUM!  ADDR !NUM ;                     
+                                        
+EXIT ***** REMOVED 7-8-86 *****         
+: +-RAN \ N --> N                       
+  2 RANDOM IF NEGATE THEN ;             
+: RANDSIGN \ * --> PLUS OR MINUS        
+   2 RANDOM  IF PLUS ELSE MINUS THEN ;  
+WIDTH 6 TO WIDTH                        
+: DENOM@ ADDR @DENOM ;                  
+: DENOM! ADDR !DENOM ;                  
+TO WIDTH                                
+                                        
+                                        
+-------------------------------------------- SCREEN 008
+( <PARENS>               < 6/26/86>148) 
+                                        
+: <PARENS>                              
+    SWAP 0                              
+    DO                                  
+      DUP EMIT                          
+    LOOP  DROP ;                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 009
+( TREE-FULL              < 6/26/86>149) 
+                                        
+\ Search the tree for a free node.      
+\ Return a 1 if a node is available     
+\ or a 0 if not.                        
+\ The node # is left in local.          
+                                        
+MAKELOCAL                               
+                                        
+: TREE-FULL                             
+   -1 LOCAL ! 29 0                      
+   DO                                   
+    I ADDR @KIND NOT                    
+    IF I LOCAL ! LEAVE THEN             
+   LOOP   LOCAL @ 0 <     ;             
+                                        
+\ If a free node is available,          
+\   return node #, 1; if not, return 0. 
+                                        
+: FREENODE ( -- 0 or node #, 1 )        
+   TREE-FULL NOT                        
+   IF LOCAL @ 1 ELSE 0 THEN ;           
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 010
+( IS-PAR IF-LT-PAR +     < 6/26/86>150) 
+                                        
+: IS-PAR   ( adr -- )                   
+    DUP @PAR DUP                        
+    IF                                  
+      #PAR ! @PL/R L-R ! 1              
+    ELSE                                
+      DDROP 0. L-R !                    
+    THEN ;                              
+                                        
+: IF-LT-PAR ( adr -- )                  
+    IS-PAR L-R @ NOT AND                
+    IF                                  
+      #PAR @ 40 <PARENS>                
+    THEN ;                              
+                                        
+: IF-RT-PAR                             
+    L-R @                               
+    IF                                  
+      8 EMIT                            
+      #PAR @ 41 <PARENS> SPACE          
+    THEN ;                              
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 011
+( *GO  CASE              < 6/26/86>151) 
+                                        
+: *GO      ( adr -- left min )          
+   CFA TO <*GO>                         
+   BEGIN                                
+     DUP <*GO> EXECUTE DUP              
+     NUL = NOT                          
+   WHILE                                
+     SWAP DROP                          
+   REPEAT DROP ;                        
+                                        
+: CASE                                  
+   :                                    
+   DOES>                                
+     SWAP 2* +                          
+     @ EXECUTE ;                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 012
+( BS .N/D .CON .VARNODE +< 7/ 8/86>152) 
+: .# 0 .R ;                             
+: .N/D  ( n d -- )                      
+    DDUP 0= SWAP 0= OR                  
+    IF      DDROP  0 .#                 
+    ELSE    SWAP .#                     
+         DUP 1 =                        
+      IF   DROP                         
+      ELSE DIV EMIT .#                  
+      THEN                              
+    THEN SPACE ;                        
+EXIT ***** REMOVED 7-8-86 *****         
+( NODE ADDR --> * )                     
+: .CON DUP @NUM SWAP @DENOM .N/D ;      
+: .VARNODE                              
+           >R  ( NODE ADDR )            
+       I @NUM  R> @DENOM                
+       DDUP = NOT                       
+       IF .N/D ELSE DDROP THEN          
+120    ( XVAR ) EMIT SPACE ;            
+: .VAROP  @VAROP EMIT SPACE ;           
+( NODE ADDR. , KIND - 1 ---> * )        
+CASE <.NODE> .CON .VARNODE .VAROP ;     
+                                        
+-------------------------------------------- SCREEN 013
+( .NODE                  < 6/26/86>153) 
+EXIT ***** REMOVED 7-8-86 *****         
+                                        
+: .NODE  ( node adr -- )                
+    DUP IF-LT-PAR                       
+    DUP @KIND  1-                       
+    DUP 0 2 WITHIN                      
+    IF                                  
+      <.NODE>                           
+    ELSE                                
+      DDROP                             
+    THEN                                
+    IF-RT-PAR ;                         
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 014
+( <MARKNODE>             < 7/ 8/86>154) 
+                                        
+: PRINTNODE                             
+    NOOP  ;                             
+                                        
+: <MARKNODE>                            
+   DUP @KIND 128 OR SWAP                
+   !KIND ;                              
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 015
+( NEG-ABS GO-LEFT        < 6/26/86>155) 
+                                        
+: NEG-ABS ( adr -- f )                  
+    @VAROP  NEG = ;                     
+                                        
+: GO-LEFT   ( node-adr -- )             
+    BEGIN                               
+      DUP NUL = NOT                     
+    WHILE                               
+      DUP !NSTACK \ NSTACK NPOINT @ + ! 
+           \ store node adr in NSTACK   
+      2 NPOINT +!  \ update ptr         
+      @LT  \ get contents of left ptr   
+    REPEAT                              
+    -2 NPOINT +!  \ point to top item   
+    DROP ;                              
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 016
+( PRINT1                 < 6/26/86>156) 
+                                        
+: PRINT1                                
+   IF                                   
+     DUP NEG-ABS                        
+     IF                                 
+       @RT SWAP 2+ NPOINT !             
+        \ increase ptr to compensate    
+       GO-LEFT                          
+     ELSE                               
+       DROP NSTACK + @ DUP              
+       PRINTNODE                        
+       @RT GO-LEFT                      
+     THEN                               
+   ELSE                                 
+     DDROP                              
+   THEN ;                               
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 017
+( <PRINT> INORDER PRINT +< 7/ 8/86>157) 
+                                        
+: <PRINT>   ( adr -- )                  
+     0 NPOINT ! GO-LEFT                 
+   BEGIN                                
+     NPOINT @ DUP 0 < NOT               
+   WHILE   NSTACK + @ DUP               
+     PRINTNODE  \ print node            
+     NPOINT @ 2- DUP NPOINT ! \ dec ptr 
+     DUP 0< NOT ROT DUP                 
+     NEG-ABS ROT OR PRINT1              
+   REPEAT  DROP ;                       
+                                        
+: INORDER                               
+   \ inorder from the root              
+   0 ADDR 0 NPOINT !   <PRINT> ;        
+                                        
+: PRINT    NOOP ;                       
+                                        
+EXIT --- RE WRITTEN ---                 
+: LPRINT   0 ADDR @LT <PRINT> ;         
+                                        
+: RPRINT   0 ADDR @RT <PRINT> ;         
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 018
+( PT-MAKE RT-PT-MAKE LT- < 6/26/86>158) 
+                                        
+: PT-MAKE ( adr1 adr2 f f -- )          
+   >R >R DDUP SWAP R>                   
+   IF                                   
+     !RT                                
+   ELSE                                 
+     !LT                                
+   THEN                                 
+   SWAP OVER !PRED R> SWAP !L/R ;       
+                                        
+                                        
+: RT-PT-MAKE  ( adr1  adr2 -- )         
+   RIGHT 1 PT-MAKE ;                    
+                                        
+: LT-PT-MAKE ( adr1  adr2 -- )          
+   LEFT 0 PT-MAKE ;                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 019
+(  @T <INSERT>           < 6/26/86>159) 
+                                        
+CASE @T                                 
+        @LT            @RT              
+        LT-PT-MAKE     RT-PT-MAKE       
+        LEFT           RIGHT            
+        !LT            !RT ;            
+                                        
+: <INSERT>                              
+    >R >R >R                            
+    DUP R>               @T             
+    NEW-NODE @  SWAP R>  @T             
+    NEW-NODE @  R>       @T ;           
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 020
+( #LR-INSERT #RR-INSERT +< 6/26/86>160) 
+                                        
+\    Adr of pred to new node            
+\    left branch of pred: insert node   
+\    whose right ptr points to what     
+\    its predecessor pointed to.        
+                                        
+: #LR-INSERT     0 3 2 <INSERT> ;       
+                                        
+\    Adr of pred to new node            
+\    rt branch of pred: insert          
+\    node whose right ptr               
+\    points to what its predecessor     
+\    pointed to.                        
+                                        
+: #RR-INSERT       1 3 3 <INSERT> ;     
+                                        
+\    Adr of pred to new node            
+\    left branch of pred: insert        
+\    node whose left ptr points to      
+\    what its predecessor pointed to.   
+                                        
+: #LL-INSERT        0 2 2 <INSERT> ;    
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 021
+( #RL-INSERT <LEAF-INSERT< 7/ 8/86>161) 
+                                        
+\    Adr of pred to new node            
+\    rt branch of pred: insert node     
+\    whose left pointer points to       
+\    what its predecessor pointed to.   
+                                        
+                                        
+: <LEAF-INSERT>                         
+    NEW-NODE @ >R >R DUP I' !PRED       
+    I @T I' !L/R I' SWAP R> 2+ @T       
+    R> DUP NUL SWAP !RT                 
+    NUL SWAP !LT ;                      
+                                        
+: R-LEAF-INSERT ( adr -- )              
+    5 <LEAF-INSERT> ;                   
+: L-LEAF-INSERT ( adr )                 
+    4 <LEAF-INSERT> ;                   
+                                        
+EXIT ***** REMOVED 7-8-86 *****         
+                                        
+: #RL-INSERT       1 2 3 <INSERT> ;     
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 022
+( <OP> OP-NODE-CREATE +  < 6/26/86>162) 
+                                        
+: <OP>                                  
+    FREENODE                            
+    IF                                  
+       ADDR   DUP NEW-NODE !            
+       SWAP OVER                        
+    ELSE ." NO MORE NODES LEFT !!"      
+       QUIT                             
+    THEN ;                              
+                                        
+: OP-NODE-CREATE ( operand )            
+    <OP> !VAROP OP SWAP !KIND ;         
+                                        
+: CON-NODE-CREATE ( num denom )         
+    <OP> !DENOM >R I !NUM CON           
+    R> !KIND ;                          
+                                        
+: VAR-NODE-CREATE ( num denom var )     
+    <OP> !VAROP >R I !DENOM             
+    I !NUM VAR R> !KIND ;               
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 023
+( <##INS> <#INSERT>      < 7/ 8/86>163) 
+                                        
+CASE <##INS>                            
+  #LL-INSERT     #LR-INSERT             
+\ #RL-INSERT     #RR-INSERT             
+  NOOP NOOP \ above not used            
+  R-LEAF-INSERT  L-LEAF-INSERT ;        
+                                        
+MAKELOCAL                               
+: <#INSERT>                             
+    >R >R 0 ADDR I <##INS>              
+    R> NEW-NODE @ >R 2 <                
+    IF                                  
+      LOCAL ! DDUP                      
+    THEN                                
+    LOCAL @   DUP                       
+    IF                                  
+      VAR-NODE-CREATE                   
+    ELSE                                
+      DROP CON-NODE-CREATE              
+    THEN                                
+    R> R> <##INS> ;                     
+                                        
+                                        
+-------------------------------------------- SCREEN 024
+( LR-OP-VAR-INSERT +     < 7/ 8/86>164) 
+                                        
+: *PP                                   
+    NOOP ;                              
+                                        
+: LL-OP-VAR-INSERT                      
+    1 5 <#INSERT> ;                     
+                                        
+: LR-OP-VAR-INSERT                      
+    0 4 <#INSERT> ;                     
+                                        
+EXIT ***** REMOVED 7-8-86 *****         
+                                        
+: RR-OP-VAR-INSERT                      
+    2 4 <#INSERT> ;                     
+                                        
+: RL-OP-VAR-INSERT                      
+    3 5 <#INSERT> ;                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 025
+( :OP? IS+- ?MULT ?DIV   < 6/26/86>165) 
+                                        
+: :OP?                                  
+     CREATE                             
+       C,                               
+     DOES>                              
+       C@ SWAP @VAROP = ;               
+                                        
+MULT  :OP? ?MULT                        
+DIV   :OP? ?DIV                         
+PLUS  :OP? ?PLUS                        
+MINUS :OP? ?MINUS                       
+                                        
+: IS+-  ( node-adr -- f )               
+    DUP ?PLUS SWAP ?MINUS OR ;          
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 026
+( DIST<-CHECK            < 6/26/86>166) 
+: DIST<-CHECK ( node-adr -- )           
+    0. RDIST<-OK ! LDIST<-OK !          
+    DUP CUR-NODE ! DUP ?MULT            
+    SWAP ?DIV OR                        
+    IF                                  
+      CUR-NODE @ DUP @LT                
+      IS+-                              
+      IF                                
+        1 RDIST<-OK !                   
+      THEN                              
+      DUP ?MULT                         
+      IF                                
+        @RT IS+-                        
+        IF   1 LDIST<-OK ! THEN         
+      ELSE                              
+        DROP                            
+      THEN                              
+    THEN                                
+    RDIST<-OK @ LDIST<-OK @ OR          
+    IF      1 DIST<-OK ! 1 ?DIST< !     
+    ELSE    0 DIST<-OK !                
+    THEN ;                              
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 027
+( COPY-NODE-LEAF         < 6/26/86>167) 
+                                        
+: COPY-NODE-LEAF ( adr -- )             
+    DUP @KIND DUP >R                    
+    OP =                                
+    IF                                  
+      R> DROP \ ADDED BY GW 6/17        
+      @VAROP OP-NODE-CREATE             
+    ELSE                                
+      R> CON =                          
+      IF                                
+        DUP @NUM SWAP @DENOM            
+        CON-NODE-CREATE                 
+      ELSE                              
+        DUP DUP @NUM SWAP               
+        @DENOM ROT @VAROP               
+        VAR-NODE-CREATE                 
+      THEN                              
+    THEN ;                              
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 028
+( RL <DIST<1>>           < 6/26/86>168) 
+                                        
+CASE RL                                 
+       @RT              @LT             
+       RT-PT-MAKE       LT-PT-MAKE      
+       R-LEAF-INSERT    L-LEAF-INSERT   
+       LDIST<-OK        RDIST<-OK ;     
+                                        
+: <DIST<1>>                             
+    >R I RL I NOT RL NEW-NODE @         
+    SWAP I 2+ RL NEW-NODE @ I NOT       
+    RL COPY-NODE-LEAF CUR-NODE @        
+    I RL DUP I NOT 4 + RL R>            
+    IF      ?MUL @                      
+      IF                                
+        MULT                            
+      ELSE                              
+        DIV                             
+      THEN                              
+    ELSE                                
+      MULT                              
+    THEN                                
+    SWAP !VAROP ;                       
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 029
+( <DIST<>                < 6/26/86>169) 
+: <DIST<>  ( OP-NODE-ADDRESS )          
+   >R DIST<-CHECK I 6 + RL @            
+   TREE-FULL NOT AND                    
+   IF   CUR-NODE @ DUP DDUP I           
+    IF ( ?MULT DUP ) @LT ELSE @RT THEN  
+      ?PLUS IF PLUS ELSE MINUS  THEN    
+      SWAP !VAROP R>                    
+      IF     ?MUL @                     
+        IF                              
+          MULT OP-NODE-CREATE           
+        ELSE   DIV OP-NODE-CREATE       
+        THEN                            
+        #RR-INSERT                      
+        1 <DIST<1>>                     
+      ELSE        MULT OP-NODE-CREATE   
+        #LL-INSERT                      
+        0 <DIST<1>>                     
+      THEN                              
+    ELSE  R> DROP \ ADDED BY GW 6/17    
+      CR ." CAN'T DO: LDIST< CANNOT"    
+      CR ." BE APPLIED HERE "           
+    THEN ;                              
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 030
+( M--FUNCTION L-FUNCTION < 6/26/86>170) 
+                                        
+ CASE M-FUNCTION                        
+   LL-OP-VAR-INSERT \ RL-OP-VAR-INSERT  
+   NOOP \ above not used ^^^^^          
+   LR-OP-VAR-INSERT \ RR-OP-VAR-INSERT  
+   NOOP \ above not use ^^^^^           
+   MULT PLUS MINUS DIV ;                
+                                        
+: L-FUNCTION                            
+    >R >R                               
+    IF I M-FUNCTION OP-NODE-CREATE      
+      I' M-FUNCTION R> M-FUNCTION       
+      OP-NODE-CREATE R> 1+              
+      M-FUNCTION *PP                    
+    ELSE                                
+      DDROP R> R> DDROP DROP CR         
+      ." TOO MANY STEPS OR NON-LINEAR"  
+      CR ." STEP"                       
+    THEN   ;                            
+: ?TFULL                                
+    DUP TREE-FULL OR NOT ;              
+                                        
+                                        
+-------------------------------------------- SCREEN 031
+( L-MULT R-DIV R-SUBT R-A< 7/ 8/86>171) 
+: R-SUBT                                
+     TREE-FULL NOT                      
+     6 2 L-FUNCTION ;                   
+: R-DIV                                 
+     ?TFULL 7 2 L-FUNCTION ;            
+: R-ADD                                 
+     TREE-FULL NOT                      
+     5 2 L-FUNCTION ;                   
+: L-MULT                                
+     ?TFULL 4 0 L-FUNCTION ;            
+EXIT ***** REMOVED 7-8-86 *****         
+                                        
+: L-DIV                                 
+     ?TFULL 7 0 L-FUNCTION ;            
+: R-MULT                                
+     ?TFULL 4 2 L-FUNCTION ;            
+: L-SUBT                                
+     TREE-FULL NOT                      
+     6 0 L-FUNCTION ;                   
+: L-ADD                                 
+     TREE-FULL NOT                      
+     5 0 L-FUNCTION ;                   
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 032
+(                        < 6/26/86>172) 
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 033
+( #REDUCE                < 6/26/86>173) 
+                                        
+: #REDUCE   ( num denom -- num1 denom1) 
+    DDUP \ NUM OR DENOM= 0              
+    0= SWAP 0= OR                       
+    IF               DDROP 0 0          
+    ELSE     \ NUM DENOM -- 1 OR -1     
+       DDUP 0< SWAP 0< =                
+       IF 1 ELSE -1 THEN                
+       >R                               
+       ABS SWAP ABS SWAP                
+       DDUP                             
+       1 BEGIN       ( GCD )            
+         WHILE       DDUP MOD           
+           ROT DROP DUP                 
+         REPEAT      DROP               
+         DUP 1 = NOT                    
+       IF          SWAP OVER /          
+       ROT ROT / SWAP                   
+       ELSE                             
+         DROP                           
+       THEN                             
+       SWAP R> * SWAP                   
+    THEN ;                     ( LRP  ) 
+-------------------------------------------- SCREEN 034
+(                        < 6/26/86>174) 
+                                        
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 035
+( DO-NEG-OR-ABS RECOVER-N< 6/26/86>175) 
+                                        
+: DO-NEG-OR-ABS   ( adr op -- )         
+    \ Does op and stores in node        
+    NEG =                               
+    IF                                  
+      DUP @NUM NEGATE SWAP !NUM         
+    THEN ;                              
+                                        
+: RECOVER-NODES    ( node-adr -- )      
+    ' PRINTNODE @ >R                    
+    ' <MARKNODE> CFA TO PRINTNODE       
+    INORDER                             
+    NODE#MAX 0                          
+    DO                                  
+      I ADDR DUP @KIND                  
+      128 AND NOT                       
+      IF     DELNODE                    
+      ELSE   DUP @KIND 127 AND          
+             SWAP !KIND                 
+      THEN                              
+    LOOP                                
+    R> TO PRINTNODE ;                   
+EXIT                           ( LRP  ) 
+-------------------------------------------- SCREEN 036
+( NEG-ABS-DELETE #REDUCE!< 6/26/86>176) 
+                                        
+: NEG-ABS-DELETE ( adr -- )             
+     DUP >R                             
+     DUP @L/R RIGHT = >R                
+     DUP @PRED SWAP @RT                 
+     R> 2+ @T                           
+     R> DELNODE ;                       
+                                        
+: #REDUCE!                              
+     NUM-SAVE @ DENOM-SAVE              
+     @ #REDUCE DENOM-SAVE !             
+     NUM-SAVE ! ;                       
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 037
+( NCOMPUTE               < 6/26/86>177) 
+: NCOMPUTE \ COMPUTES RESULT AND        
+         \ PUTS THE NUM AND DENOM       
+         \ IN NUM-SAVE AND DENOM-SAVE   
+       NUM-R @ L-NUM @ L-DENOM @        
+       DENOM-R @ OP-SAVE @ DUP MULT =   
+IF     DROP * DENOM-SAVE !              
+       * NUM-SAVE ! #REDUCE!            
+ELSE      DIV =                         
+ IF    ROT * NUM-SAVE ! *               
+       DENOM-SAVE !  #REDUCE!           
+ ELSE  DUP 0= 3 PICK 0= OR 4 PICK 0= OR 
+       5 PICK 0= OR                     
+    IF   4 ROLL DDUP 0= SWAP 0= OR      
+       IF DDROP SWAP                    
+       ELSE 3  ROLL  4 ROLL DDROP       
+       THEN NUM-SAVE ! DENOM-SAVE !     
+            #REDUCE!                    
+    ELSE  DDUP * DENOM-SAVE ! ROT *     
+          >R * R> OP-SAVE @             
+          P/M                           
+          NUM-SAVE ! #REDUCE!           
+    THEN                                
+THEN THEN ;                    ( LRP  ) 
+-------------------------------------------- SCREEN 038
+( PUT-COMP               < 6/26/86>178) 
+                                        
+: PUT-COMP ( adr-of-op R/L -- )         
+     @T                                 
+     DUP NUM-SAVE @ SWAP                
+     !NUM DENOM-SAVE @                  
+     SWAP !DENOM ;                      
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 039
+( DELETE-NODE&PRED       < 6/26/86>179) 
+                                        
+: DELETE-NODE&PRED ( adr -- )           
+\   Deletes node, puts other child      
+\   in predecessor's place              
+    DUP       >R                        
+    @PRED DUP R>                        
+    @L/R NOT                            
+    @T SWAP DUP @PRED SWAP              
+    @L/R                                
+    ROT SWAP NOT NOT  2+ @T ;           
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 040
+(                        < 6/26/86>180) 
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 041
+(                        < 6/26/86>181) 
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 042
+( IS-LEAF                < 6/26/86>182) 
+                                        
+\ A leaf has no left or right pointer.  
+\ IS-LEAF tests left and right          
+\ links of the node address for 0.      
+\ Returns a true if the node is a leaf. 
+\ Returns a false if the node           
+\ is not a leaf; e.g. LT OR RT <> 0.    
+                                        
+: IS-LEAF ( node-adr -- f )             
+     DUP @RT 0=                         
+     IF                                 
+       @LT 0=                           
+     ELSE                               
+       DROP 0                           
+     THEN ;                             
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 043
+( HAS-LEAVES             < 6/26/86>183) 
+                                        
+: HAS-LEAVES    ( node-adr -- f )       
+    \ RT PTR <> = 0                     
+    DUP @RT DUP                         
+    IF                                  
+      IS-LEAF   \ adr, rt adr           
+      \ Is the right adr a leaf?        
+      \ If it is, test left adr.        
+      IF                                
+        @LT DUP 0=    \ lt adr f        
+        IF                              
+          \ lt and rt nodes are leaves  
+          DROP 1   \  true              
+        ELSE                            
+          IS-LEAF \ test lt ptr         
+        THEN                            
+      ELSE      DROP 0 \ RIGHT PTR = 0  
+      THEN                              
+      \ rt ptr is 0                     
+      \ This node does not have leaves. 
+    ELSE          DDROP 0               
+    THEN ;                              
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 044
+( PLUS-MINUS-CON&VAR     < 6/26/86>184) 
+                                        
+: PLUS-MINUS-CON&VAR ( op -- f )        
+    DUP PLUS = SWAP                     
+    MINUS = OR                          
+    IF                                  
+      L-KIND @ CON =                    
+      KIND-R @ VAR = AND                
+      L-KIND @ VAR =                    
+      KIND-R @ CON = AND OR             
+    ELSE                                
+      \  DROP  0   \ LRP 7/1/86         
+      0            \ LRP 7/1/86         
+    THEN ;                              
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 045
+( DO-OP2                 < 6/26/86>185) 
+                                        
+: DO-OP2                                
+   IF                                   
+     RIGHT DUP RT-LEAF ! PUT-COMP       
+       \ puts result in rt leaf         
+   ELSE                                 
+      KIND-R @ CON =                    
+      IF     LEFT DUP RT-LEAF !         
+        PUT-COMP                        
+      ELSE                              
+        \ both are variable             
+        OP-SAVE @ DUP PLUS = SWAP       
+        MINUS = OR                      
+        IF  RIGHT DUP RT-LEAF !         
+          PUT-COMP                      
+        ELSE                            
+          CR ." CAN'T DO NOW "          
+        THEN                            
+     THEN                               
+  THEN ;                                
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 046
+( OP1-DO                 < 6/26/86>186) 
+                                        
+: OP1-DO    ( adr -- num )              
+          DUP DUP @LT DUP DUP           
+ ( LT )   @KIND    L-KIND   !           
+ ( LT )   @NUM     L-NUM    !           
+ ( LT )   @DENOM   L-DENOM  !           
+          @RT      DUP DUP              
+ ( RT )   @KIND    KIND-R   !           
+ ( RT )   @NUM     NUM-R    !           
+ ( RT )   @DENOM   DENOM-R  ! DUP       
+ ( ROOT ) @VAROP   OP-SAVE ! NCOMPUTE   
+            \ Saves num and denom in    
+            \ NUM-SAVE and DENOM-SAVE   
+          NUM-SAVE @ ;                  
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 047
+( DO-OP                  < 6/26/86>187) 
+                                        
+: DO-OP                                 
+  \ Address of op node with two leaves. 
+  \ Does op and sets CANCELS; Stores    
+  \ in rt or lt leaf if CANCELS is      
+  \ false and sets rt-leaf to true      
+  \ or false.                           
+    0 CANCELS !                         
+    OP1-DO                              
+    IF                                  
+      L-KIND @ CON = DO-OP2             
+    ELSE                                
+      DUP @PRED ROOT @ =                
+      IF   \ Special case when          
+           \ predecessor is the root.   
+        DUP @RT CON SWAP !KIND          
+        RIGHT DUP RT-LEAF !             
+        PUT-COMP                        
+      ELSE                              
+        DROP 1 CANCELS !                
+      THEN                              
+    THEN ;                              
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 048
+( COMB1                  < 6/26/86>188) 
+: COMB1                                 
+    SWAP DUP @LT @KIND L-KIND !         
+    @RT @KIND KIND-R !                  
+    PLUS-MINUS-CON&VAR NOT              
+    IF  1 <?COMB> ! 1 ?TCOMB !          
+        DUP DO-OP                       
+          \ Does op and sets CANCELS.   
+          \ If CANCELS is false it      
+          \ puts result in rt or lt     
+          \ leaf and sets rt-leaf       
+        CANCELS @                       
+        IF    DELETE-NODE&PRED          
+          \ Delete node and it's pred   
+        ELSE                            
+          DUP DUP @PRED SWAP            
+          @L/R >R                       
+          SWAP RT-LEAF @ NOT NOT @T     
+          R> NOT NOT  2+ @T             
+        THEN                            
+          \ Replace op with leaf        
+    ELSE    DDROP                       
+    THEN ;                              
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 049
+( COMB                   < 6/26/86>189) 
+                                        
+: COMB ( node-adr -- )                  
+    0 <?COMB> ! DUP HAS-LEAVES          
+    IF                                  
+       DUP ( DDUP ) DUP @VAROP DUP DUP  
+       NEG = SWAP ABS# = OR             
+       IF  1 <?COMB> !                  
+         1 ?TCOMB !                     
+         SWAP @RT SWAP DO-NEG-OR-ABS    
+          \ Does op and stores in node  
+         NEG-ABS-DELETE                 
+         RIGHT RT-LEAF   !              
+         0 CANCELS !                    
+       ELSE                             
+         ( OP: +, -, *, OR / )          
+         COMB1                          
+      THEN                              
+    ELSE                                
+      DROP                              
+    THEN ;                              
+                                        
+\ LRP changed DDUP 7/3/86               
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 050
+(                        < 6/26/86>190) 
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 051
+( SWITCH-RL              < 7/ 8/86>191) 
+EXIT ***** REMOVED 7-8-86 *****         
+                                        
+: SWITCH-RL ( adr -- )                  
+      \ Switch right and left ptrs      
+       DUP DDUP                         
+       @RT DUP                          
+       LEFT SWAP  !L/R                  
+       >R                               
+          @LT DUP                       
+          RIGHT SWAP !L/R               
+          SWAP !RT                      
+       R>                               
+       SWAP !LT ;                       
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 052
+(                        < 6/26/86>192) 
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 053
+(                        < 6/26/86>193) 
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 054
+( #NEG-DELETE            < 6/26/86>194) 
+                                        
+: #NEG-DELETE ( adr -- )                
+    NEG-ABS-DELETE                      
+    ?DEL-NEG @                          
+    IF                                  
+       RT-NODE @                        
+      @RT RT-NODE !                     
+    THEN ;                              
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 055
+(                        < 6/26/86>195) 
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 056
+( CHANGE-TO-PLUS L-INSERT< 6/26/86>196) 
+                                        
+: CHANGE-TO-PLUS ( adr -- )             
+    PLUS SWAP !VAROP ;                  
+                                        
+: L-INSERT-NEG ( adr -- )               
+    NEG OP-NODE-CREATE                  
+    NEW-NODE @                          
+    LT-#NUL   #LR-INSERT ;              
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 057
+(                        < 6/26/86>197) 
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 058
+( PM1                    < 6/26/86>198) 
+: PM1                                   
+    IF                                  
+      DUP @VAROP DUP PLUS =             
+      IF SWAP DUP L-INSERT-NEG          
+         NEG OP-NODE-CREATE             
+         NEW-NODE @ LT-#NUL             
+         #RR-INSERT                     
+         DROP                           
+      ELSE     DUP MINUS =              
+        IF  SWAP DUP CHANGE-TO-PLUS     
+            L-INSERT-NEG DROP           
+        ELSE    DUP NEG =               
+          IF   SWAP #NEG-DELETE DROP    
+          ELSE DUP MULT = SWAP          
+               DIV = OR                 
+            IF L-INSERT-NEG THEN        
+          THEN                          
+        THEN                            
+      THEN                              
+    ELSE     \   Change-sign            
+      DUP @NUM -1 * SWAP !NUM           
+    THEN ;                              
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 059
+( PM2                    < 6/26/86>199) 
+                                        
+: PM2                                   
+    IF                                  
+      DUP @VAROP DUP DUP MINUS          
+      = SWAP NEG = OR                   
+      IF      MINUS =                   
+        IF                              
+           CHANGE-TO-PLUS               
+           1 ?CM !                      
+        ELSE                            
+           1 ?DEL-NEG !                 
+           1 ?CM !                      
+           NEG-ABS-DELETE               
+        THEN                            
+           RT-NODE @ DUP @KIND          
+           OP = PM1                     
+                                        
+      ELSE    DDROP                     
+      THEN                              
+   ELSE        DROP                     
+   THEN ;                               
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 060
+(  PUSH-MINUS            < 6/26/86>200) 
+                                        
+: PUSH-MINUS     ( adr -- )             
+     0 ?DEL-NEG ! TREE-FULL             
+     NOT  IF                            
+             DUP DUP                    
+             @RT RT-NODE !              
+             @KIND OP = PM2             
+          ELSE                          
+            CR ." TOO MANY NEW NODES "  
+            ." MAY BE NEEDED " DROP     
+          THEN ;                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 061
+(    DEL-COMB            < 6/26/86>201) 
+                                        
+: DEL-COMB ( adr -- adr )               
+    <?COMB> @                           
+    IF                                  
+       CANCELS @ NOT                    
+       IF                               
+          \ If RT-LEAF 0 then @LT       
+          \ else @RT                    
+          RT-LEAF @ NOT NOT  @T         
+       ELSE                             
+          DROP NPOINT @ 2- DUP          
+          NPOINT !  NSTACK + @ @RT      
+       THEN                             
+    THEN ;                              
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 062
+(  DEL-NEG NEG/ABS SKIP  < 6/26/86>202) 
+                                        
+: DEL-NEG                               
+    ?DEL-NEG @                          
+    IF DROP RT-NODE @ THEN ;            
+                                        
+: NEG/ABS  ( adr pt -- )                
+    SWAP DUP @VAROP NEG =  ;            
+                                        
+: SKIP     ( adr pt -- )                
+    SWAP 0 ;                            
+                                        
+: ACTION      NOOP ;                    
+                                        
+: NTEST       NOOP ;                    
+                                        
+: GO-NOOP     NOOP ;                    
+                                        
+: SP-TEST     NOOP ;                    
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 063
+(  #GO-LEFT              < 6/26/86>203) 
+                                        
+\ Subroutine for TRAV.                  
+\ Find the left most node               
+\ from a node address.                  
+                                        
+: #GO-LEFT ( node-adr -- )              
+   BEGIN                                
+     DUP                                
+   WHILE                                
+     DUP NTEST ACTION  DUP              
+     !NSTACK      \ Store node-adr      
+                  \ in NSTACK.          
+     2 NPOINT +!  \ Update ptr.         
+     @LT          \ Get contents of     
+                  \ left ptr.           
+   REPEAT                               
+   -2 NPOINT +! \ POINT TO TOP ITEM     
+   DROP ;                               
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 064
+( TRAVERSE NODES INORDER           203) 
+: TRAV   ( ADDR )                       
+          ( .MYSELF )                   
+          0 NPOINT ! GO-NOOP            
+   BEGIN  NPOINT @ DUP 0< NOT           
+   WHILE \  STACK NOT EMPTY             
+         NSTACK + @ \ GET TOP OF STACK  
+         NPOINT @ 2- DUP NPOINT !       
+                   \ DECREASE POINTER   
+         DUP 0< NOT                     
+IF       SP-TEST                        
+    IF   @RT SWAP 2+ NPOINT !           
+     \ INCREASE POINTER TO COMPENSATE   
+         GO-NOOP                        
+    ELSE                                
+         DROP NSTACK + @                
+         ( GET TOP OF STACK )           
+         @RT GO-NOOP                    
+    THEN                                
+ELSE     DDROP                          
+THEN    REPEAT DROP ( .MYSELF ) ;       
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 065
+( CM -> CLEAR-MINUS      < 6/26/86>205) 
+                                        
+: CM                                    
+    ' PUSH-MINUS CFA TO NTEST           
+    ' #GO-LEFT   CFA TO GO-NOOP         
+    ' NEG/ABS    CFA TO SP-TEST         
+    ' DEL-NEG    CFA TO ACTION          
+    ROOT @ TRAV *PP ;                   
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 066
+(  ZERO-DEL              < 6/26/86>206) 
+: (ZERO-DEL)                            
+    CONFLAG @                           
+    IF   CONPLACE @ DUP @NUM 0=         
+      IF   DUP @PRED ROOT @ = NOT       
+        IF    DELETE-NODE&PRED          
+        ELSE  DROP                      
+        THEN                            
+      ELSE    DROP                      
+      THEN                              
+    THEN                                
+     #VAR @ DUP                         
+    IF                                  
+      0 DO                              
+         I 2* VARNAME + @ DUP @NUM 0=   
+         IF   DUP @PRED ROOT @ = NOT    
+           IF     DELETE-NODE&PRED      
+           ELSE   CON SWAP !KIND        
+           THEN                         
+         ELSE      DROP                 
+         THEN                           
+        LOOP                            
+    ELSE DROP THEN ;                    
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 067
+( +ADD !NONPLUS !VARNAME < 6/26/86>207) 
+                                        
+: +ADD ( adr2 adr1 -- )                 
+     DUP ROT DUP @NUM SWAP @DENOM       
+     ROT DUP @NUM SWAP @DENOM           
+     ROT DDUP * DENOM-SAVE !            
+     ROT * >R * R> + NUM-SAVE !         
+       \ Put result in node             
+     DUP ( adr1 ) NUM-SAVE @            
+     SWAP !NUM DENOM-SAVE @ SWAP        
+     !DENOM 1 ?CLT ! ;                  
+                                        
+: !NONPLUS ( adr -- )                   
+     #NONPLUS @ SWAP OVER               
+     2* NONPLUS + ! 1+ #NONPLUS ! ;     
+                                        
+: !VARNAME ( adr -- )                   
+     #VAR @ SWAP OVER 2*                
+     VARNAME + ! 1+ #VAR ! ;            
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 068
+(                        < 6/26/86>208) 
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 069
+( VARCHECK               < 6/26/86>209) 
+                                        
+: VARCHECK ( adr2 -- adr )              
+     DUP @VAROP 0 VCOUNT !              
+     0 FOUND !                          
+     BEGIN                              
+       DUP VCOUNT @ DUP #VAR @ = NOT    
+     WHILE                              
+       2* VARNAME + @ DUP               
+       @VAROP ROT =                     
+       IF                               
+         #VAR @ VCOUNT ! 1 FOUND !      
+         ROT DUP ROT +ADD               
+           \ Adds coef to var found     
+         DUP DELETE-NODE&PRED SWAP      
+       ELSE                             
+         DROP 1 VCOUNT +!               
+       THEN                             
+     REPEAT                             
+     DDROP FOUND @ NOT                  
+     IF     DROP DUP !VARNAME           
+     ELSE   DROP                        
+     THEN ;                             
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 070
+( CHECK-NODE             < 6/26/86>210) 
+                                        
+: CHECK-NODE ( adr2 -- adr )            
+    0 IGNORE-SUC ! DUP                  
+    @KIND DUP VAR =                     
+    IF                                  
+       DROP VARCHECK                    
+    ELSE        CON =                   
+       IF       CONFLAG @               
+          IF    DUP DUP CONPLACE @ +ADD 
+             DELETE-NODE&PRED           
+          ELSE  1 CONFLAG !             
+             DUP CONPLACE !             
+          THEN                          
+       ELSE                             
+           \ an op                      
+           DUP ?PLUS NOT                
+           IF                           
+              DUP !NONPLUS              
+              1 IGNORE-SUC !            
+           THEN                         
+       THEN                             
+    THEN ;                              
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 071
+( TCOMB                  < 6/26/86>211) 
+                                        
+: TCOMB ( -- )                          
+        ' COMB     CFA TO NTEST         
+        ' #GO-LEFT CFA TO GO-NOOP       
+        ' NEG/ABS  CFA TO SP-TEST       
+        ' DEL-COMB CFA TO ACTION        
+         ROOT @ DUP                     
+         @LT DUP SUBROOT !              
+         SWAP @RT RT-SAVE !             
+         TRAV RT-SAVE @ DUP             
+         SUBROOT ! TRAV *PP ;           
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 072
+( %GO-LEFT               < 6/26/86>212) 
+                                        
+: %GO-LEFT ( adr -- )                   
+    \ Subroutine for TRAV               
+    BEGIN                               
+      DUP                               
+    WHILE                               
+      CHECK-NODE DUP                    
+      !NSTACK                           
+         \ Store node adr in NSTACK     
+      2 NPOINT +!  \ Update ptr         
+      IGNORE-SUC @                      
+      IF                                
+        DROP NUL                        
+      ELSE                              
+        @LT                             
+      THEN                              
+        \ Ignore successor or           
+        \ get contents of left ptr.     
+    REPEAT                              
+    -2 NPOINT +!  \ Point to top item   
+    DROP ;                              
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 073
+( CLT+ CLT++             < 6/26/86>213) 
+                                        
+: CLT+ ( adr -- )                       
+    VARNAME 50 NUL FILL                 
+    0. #VAR ! CONFLAG !                 
+    ' %GO-LEFT CFA TO GO-NOOP           
+    ' SKIP     CFA TO SP-TEST           
+    TRAV (ZERO-DEL) ;                   
+                                        
+                                        
+: CLT++ ( adr -- )                      
+    DUP @LT CLT+ @RT CLT+ ;             
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 074
+( CLT                    < 6/26/86>214) 
+                                        
+: CLT                                   
+     CM 0 #NONPLUS !                    
+     NONPLUS 30 NUL FILL                
+     ROOT @ CLT++                       
+     BEGIN                              
+       #NONPLUS @ DUP                   
+     WHILE                              
+       1- DUP #NONPLUS ! 2*             
+       NONPLUS + @ CLT++                
+     REPEAT                             
+     DROP                               
+     *PP ;                              
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 075
+( L-PAR-PUT R-PAR-PUT    < 6/26/86>215) 
+                                        
+: L-PAR-PUT  ( adr -- )                 
+    DUP DUP @PAR                        
+    1+ SWAP !PAR                        
+    LEFT SWAP !PL/R ;                   
+                                        
+: R-PAR-PUT ( adr -- )                  
+    DUP DUP @PAR                        
+    1+ SWAP !PAR                        
+    RIGHT SWAP !PL/R ;                  
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 076
+( PUT-PAREN              < 6/26/86>216) 
+                                        
+: PUT-PAREN ( adr -- )                  
+     DUP @KIND OP =                     
+     IF                                 
+        DUP @VAROP NEG = NOT            
+        IF                              
+          DUP SUBROOT @ = NOT           
+          IF                            
+             DUP ' @LT *GO              
+             L-PAR-PUT                  
+             ' @RT *GO                  
+             R-PAR-PUT                  
+          ELSE                          
+              DROP                      
+          THEN                          
+        ELSE                            
+          DROP                          
+        THEN                            
+      ELSE                              
+        DROP                            
+      THEN ;                            
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 077
+( CLEAR-PAREN CP PP      < 6/26/86>217) 
+                                        
+: CLEAR-PAREN ( adr -- )                
+    0 SWAP !PAR ;                       
+                                        
+: CP                                    
+    ' CLEAR-PAREN CFA TO NTEST          
+    ' #GO-LEFT    CFA TO GO-NOOP        
+    ' NOOP       CFA TO ACTION          
+    ' NEG/ABS     CFA TO SP-TEST        
+    ROOT @ TRAV ;                       
+                                        
+: PP                                    
+    CP ' PUT-PAREN CFA TO NTEST         
+    ROOT @ DUP @LT DUP SUBROOT !        
+    SWAP @RT RT-SAVE ! TRAV             
+    RT-SAVE @ DUP SUBROOT !             
+    TRAV ;                              
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 078
+( S-FORM                 < 7/ 8/86>218) 
+EXIT ***** REMOVED 7-8-86 *****         
+                                        
+: S-FORM ( -- 0,1,2,3, or 4 )           
+     ROOT @ DUP @RT IS-LEAF             
+     IF                                 
+        @LT DUP IS-LEAF                 
+        IF                              
+           DROP 1  \ lt & rt are leaves 
+        ELSE                            
+           HAS-LEAVES \ left side       
+           IF  2 ELSE 0 THEN            
+        THEN                            
+     ELSE                               
+        DUP @RT HAS-LEAVES              
+        IF       @LT DUP IS-LEAF        
+           IF    DROP 3                 
+           ELSE  HAS-LEAVES             
+              IF   4 ELSE 0 THEN        
+           THEN                         
+        ELSE      DROP 0                
+        THEN                            
+     THEN ;                             
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 079
+( NUM/DENOM VAR-CON VAR2/< 7/ 8/86>219) 
+EXIT ***** REMOVED 7-8-86 *****         
+                                        
+\ I added #REDUCE to get a reduced      
+\ fraction in the result.               
+\ There may be some side effects.       
+                                        
+: NUM/DENOM ( adr adr -- )              
+    @NUM SWAP @DENOM                    
+    #REDUCE ; \ ADDED BY GW             
+: VAR-CON                               
+    ROOT @ @LT DUP NUM/DENOM            
+    DDUP = NOT                          
+    IF   SWAP NUL L-MULT ( PRINT )      
+       TCOMB ( PRINT )                  
+    THEN ;                              
+: VAR2/CON2                             
+    ROOT @ DUP @RT DUP NUM/DENOM        
+    @LT @KIND VAR =                     
+    IF      XVAR R-SUBT  CLT            
+       VAR-CON                          
+    ELSE    NUL R-SUBT  CLT             
+    THEN ;                              
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 084
+( DO-DIST<               < 6/26/86>224) 
+                                        
+: DO-DIST< ( adr -- )                   
+     DUP DIST<-CHECK DIST<-OK @         
+     IF                                 
+        LDIST<-OK @                     
+        IF                              
+           0 <DIST<>                    
+        ELSE                            
+           1 <DIST<>                    
+        THEN                            
+     ELSE                               
+        DROP                            
+     THEN ;                             
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 085
+( DD                     < 6/26/86>225) 
+                                        
+: DD                                    
+    \ Do distribute                     
+    ' DO-DIST< CFA TO NTEST             
+    ' #GO-LEFT CFA TO GO-NOOP           
+    ' NEG/ABS  CFA TO SP-TEST           
+    ' NOOP    CFA TO ACTION             
+    ROOT @ DUP                          
+    @LT DUP SUBROOT ! SWAP              
+    @RT     RT-SAVE !                   
+    TRAV                                
+    RT-SAVE @ DUP SUBROOT !             
+    TRAV *PP ;                          
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 086
+( STUDENT MACHINE        < 7/ 8/86>226) 
+                                        
+EXIT ***** REMOVED 7-8-86 *****         
+                                        
+: STUDENT                               
+     ' PP    CFA TO *PP ;               
+                                        
+: MACHINE                               
+     ' NOOP CFA TO *PP ;                
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 087
+(                        < 6/26/86>227) 
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 088
+(                        < 6/26/86>228) 
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 089
+( 1VAR-CON               < 7/ 8/86>229) 
+EXIT ***** REMOVED 7-8-86 *****         
+                                        
+  6 ' WIDTH !                           
+                                        
+: 1VAR-CON                              
+     ROOT @ @LT DUP NUM/DENOM           
+     DDUP = NOT                         
+     IF                                 
+        SWAP NUL L-MULT                 
+        TCOMB  1 SOLVED !               
+     ELSE                               
+        DDROP                           
+     THEN ;                             
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 090
+( 1VAR-CON, 1VAR2/CON2   < 7/ 8/86>230) 
+EXIT ***** REMOVED 7-8-86 *****         
+                                        
+                                        
+\ * --> *  ????    I hope  ?????        
+: 1VAR2/CON2                            
+     ROOT @                             
+     DUP @RT DUP NUM/DENOM              
+       \ Note:    ROT added by GW       
+       \ @LT requires a node adddress.  
+       \ This one seems to want         
+       \ the root node address.         
+        ROT                             
+        @LT @KIND VAR =                 
+     IF                                 
+        XVAR R-SUBT CLT                 
+     ELSE                               
+        NUL R-SUBT CLT                  
+        1 SOLVED !                      
+     THEN ;                             
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 091
+( 1FORM1                 < 7/ 8/86>231) 
+EXIT ***** REMOVED 7-8-86 *****         
+                                        
+: 1FORM1                                
+     ROOT @ DUP @RT @KIND               
+     CON =                              
+     IF                                 
+        CLT @LT @KIND VAR =             
+        IF                              
+           1VAR-CON \ X = #             
+        ELSE                            
+           1VAR2/CON2                   
+       THEN                             
+     ELSE                               
+           @LT @KIND VAR =              
+           IF                           
+              1VAR2/CON2                
+           ELSE                         
+              SWITCH-RL 1VAR-CON        
+           THEN                         
+     THEN ;                             
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 092
+( 1FORM2 1FORM3          < 7/ 8/86>232) 
+EXIT ***** REMOVED 7-8-86 *****         
+                                        
+: 1FORM2                                
+     ROOT @ @LT DUP @RT DUP             
+     @KIND CON = NOT                    
+     IF                                 
+       DROP DUP @LT                     
+     THEN                               
+     DUP NUM/DENOM ROT ?PLUS            
+     IF                                 
+        NUL R-SUBT                      
+        CLT                             
+     ELSE                               
+        NUL R-ADD                       
+        CLT                             
+     THEN ;                             
+                                        
+: 1FORM3                                
+     ROOT @ SWITCH-RL 1FORM2 ;          
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 093
+( IS-RT 1FORM4 1FORM     < 7/ 8/86>233) 
+EXIT ***** REMOVED 7-8-86 *****         
+VARIABLE IS-RT                          
+                                        
+: 1FORM4                                
+     ROOT @ @RT DUP 0 IS-RT !           
+     @LT DUP @KIND VAR = NOT            
+     IF                                 
+        DROP DUP @RT 1 IS-RT !          
+     THEN                               
+     DUP NUM/DENOM ROT ?MINUS           
+     IS-RT @ AND                        
+     IF                                 
+        XVAR R-ADD                      
+        CLT                             
+     ELSE                               
+        XVAR R-SUBT                     
+        CLT                             
+     THEN  ;                            
+                                        
+CASE 1FORM   1FORM1    1FORM2           
+             1FORM3    1FORM4 ;         
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 094
+( #FORM 1S1 1SOLVE1      < 7/ 8/86>234) 
+EXIT ***** REMOVED 7-8-86 *****         
+VARIABLE #FORM                          
+                                        
+: 1S1                                   
+     S-FORM DUP #FORM !                 
+     ?DUP                               
+     IF                                 
+        ' NOOP CFA TO *PP               
+        1- 1FORM                        
+        ' PP CFA TO *PP                 
+     THEN ;                             
+                                        
+: 1SOLVE1                               
+     0 ?TCOMB ! 0 ?DIST< ! 0 ?CLT !     
+     DD ?DIST< @                        
+     IF       PP                        
+     ELSE     TCOMB ?TCOMB @            
+        IF     PP                       
+        ELSE   CLT ?CLT @               
+           IF   PP  THEN                
+        THEN                            
+     THEN ;                             
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 095
+( 1SOLVE                 < 7/ 8/86>235) 
+                                        
+: <TPRINT> NOOP ;                       
+EXIT ***** REMOVED 7-8-86 *****         
+                                        
+: (TPRINT) CM RECOVER-NODES CP PP       
+           INORDER ;                    
+' (TPRINT) CFA TO PRINT                 
+                                        
+: 1SOLVE                                
+     RECOVER-NODES                      
+     0 SOLVED !                         
+     0 #FORM !                          
+     MACHINE                            
+     0 ?TCOMB !                         
+     TCOMB                              
+     ?TCOMB @                           
+     IF   PP ELSE 1S1 THEN              
+     ?TCOMB @ NOT                       
+     #FORM @ NOT AND                    
+     IF   1SOLVE1 THEN                  
+     <TPRINT> ;                         
+MACHINE                                 
+                                        
+-------------------------------------------- SCREEN 096
+( ?SOLVED                < 6/26/86>236) 
+                                        
+: ?SOLVED                               
+     0 SOLVED !                         
+     ROOT @ DUP @LT IS-LEAF             
+     OVER @RT IS-LEAF AND               
+     IF                                 
+        DUP @LT SWAP @RT                
+        DUP @KIND CON =                 
+        IF SWAP THEN                    
+        DUP @KIND VAR =                 
+        IF                              
+           DUP @NUM 1 =                 
+           SWAP @DENOM 1 = AND SWAP     
+           @KIND CON = AND SOLVED !     
+        ELSE                            
+           DDROP                        
+        THEN                            
+     ELSE                               
+        DROP                            
+     THEN ;                             
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 097
+( SOLVE                  < 7/ 8/86>237) 
+                                        
+                                        
+                                        
+EXIT                                    
+MAKELOCAL                               
+: SOLVE                                 
+     0 LOCAL !                          
+     BEGIN                              
+       1SOLVE                           
+       1 LOCAL +!                       
+       ?SOLVED                          
+       LOCAL @ 20 >                     
+       SOLVED @ OR                      
+     UNTIL  ;                           
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 098
+( SET/DEPTH CT           < 7/ 8/86>238) 
+                                        
+MAKELOCAL                               
+                                        
+: SET/DEPTH                             
+     DEPTH LOCAL @                      
+     DDUP    = NOT                      
+     IF                                 
+        - ABS    0                      
+        DO DROP LOOP                    
+     ELSE                               
+        DDROP                           
+     THEN ;                             
+                                        
+: CT                                    
+     ' NOOP CFA TO *PP                  
+     CM TCOMB CLT                       
+     SET/DEPTH ;                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 099
+( UADD USUB              < 6/26/86>239) 
+                                        
+: UADD   ( num denom -- )               
+    TO $DENOM TO $NUM                   
+    DEPTH LOCAL !                       
+    RECOVER-NODES                       
+    $NUM $DENOM VARNUL  R-ADD           
+    RECOVER-NODES                       
+    CT RECOVER-NODES ;                  
+                                        
+: USUB   ( num denom -- )               
+    TO $DENOM TO $NUM                   
+    DEPTH LOCAL !                       
+    RECOVER-NODES                       
+    $NUM $DENOM VARNUL  R-SUBT          
+    RECOVER-NODES CT RECOVER-NODES ;    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 100
+( UDIV UMULT             < 6/26/86>240) 
+                                        
+: UDIV   ( num denom -- )               
+     TO $DENOM TO $NUM                  
+     DEPTH LOCAL !                      
+     RECOVER-NODES                      
+     $NUM $DENOM VARNUL                 
+     DD  R-DIV DD CT ;                  
+                                        
+: UMULT  ( num denom -- )               
+     TO $DENOM TO $NUM                  
+     DEPTH LOCAL !                      
+     RECOVER-NODES                      
+     $NUM $DENOM VARNUL                 
+     DD L-MULT  ;                       
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 101
+( DD NPRINT TPRINT       < 6/26/86>241) 
+                                        
+: DD                                    
+     0 ?DIST< !                         
+     DEPTH LOCAL ! RECOVER-NODES        
+     DD                                 
+     CM TCOMB SET/DEPTH ;               
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 102
+( START OF LLOYD'S ADD   < 6/26/86>242) 
+                                        
+: ==>  ( f -- )                         
+                                        
+   \ If f is true, executes the action  
+   \ part of the rule in which ==> is   
+   \ contained.                         
+   \ Leaves 1 on stack if fired, else 0 
+                                        
+   IF  1  ELSE 0 R> DROP THEN ;         
+                                        
+: TRAV-INIT  ( pfa -- node-adr )        
+                   CFA TO NTEST         
+        ' NOOP     CFA TO ACTION        
+        ' #GO-LEFT CFA TO GO-NOOP       
+        ' SKIP     CFA TO SP-TEST       
+        ROOT @ ;                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 103
+(                        < 7/ 8/86>243) 
+                                        
+VARIABLE SIGNAL                         
+                                        
+: ?*/  ( node-adr -- )                  
+   DUP ?MULT SWAP ?DIV OR               
+   IF 1 SIGNAL +! THEN ;                
+                                        
+: IF-*/                                 
+   0 SIGNAL !                           
+   ' ?*/ TRAV-INIT TRAV                 
+   SIGNAL @ 0>                          
+   ==> DD                               
+\  CR ." Distribute"                    
+;                                       
+                                        
+: ?CONS-LIKE  ( adr -- )                
+   @KIND CON = IF  1 SIGNAL +! THEN ;   
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 104
+(                        < 7/ 8/86>244) 
+                                        
+: IF-CONS-LIKE  ( -- f )                
+   0 SIGNAL !                           
+   ' ?CONS-LIKE TRAV-INIT               
+   DUP @LT TRAV SIGNAL @ 0 SIGNAL !     
+   SWAP @RT TRAV                        
+   SIGNAL @ 1 > SWAP 1 > OR             
+   ==> CT                               
+\  CR ." Clear like terms"              
+;                                       
+: ?VARS-LIKE ( adr -- )                 
+   @KIND VAR = IF 1 SIGNAL +! THEN ;    
+                                        
+: IF-VARS-LIKE  ( -- f )                
+   0 SIGNAL !                           
+   ' ?VARS-LIKE TRAV-INIT               
+   DUP @LT TRAV SIGNAL @ 0 SIGNAL !     
+   SWAP @RT TRAV                        
+   SIGNAL @ 1 > SWAP 1 > OR             
+   ==> CT                               
+\  CR ." Clear like terms"              
+;                                       
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 105
+(                        < 7/ 8/86>245) 
+                                        
+: ?CONSTANT  ( adr -- )                 
+   DUP @KIND CON =                      
+   IF SIGNAL !                          
+   ELSE DROP                            
+   THEN ;                               
+                                        
+: IF-LT-CONSTANT                        
+   0 SIGNAL !                           
+   ' ?CONSTANT  TRAV-INIT @LT TRAV      
+   SIGNAL @ 0 = NOT                     
+   ==>                                  
+   0 TO VARNUL                          
+   SIGNAL @                             
+\     CR ." Subtract " DUP .NODE        
+   DUP @NUM SWAP @DENOM USUB ;          
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 106
+(                        < 7/ 8/86>246) 
+                                        
+: ?VAR       ( adr -- )                 
+   DUP @KIND VAR =                      
+   IF SIGNAL !                          
+   ELSE DROP                            
+   THEN ;                               
+                                        
+: IF-RT-VARS                            
+   0 SIGNAL !                           
+   ' ?VAR   TRAV-INIT @RT TRAV          
+   SIGNAL @ 0 = NOT                     
+   ==>                                  
+   SIGNAL @                             
+   DUP @VAROP TO VARNUL                 
+\  CR ." Subtract " DUP .NODE           
+   DUP @NUM SWAP @DENOM USUB ;          
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 107
+(                        < 7/ 8/86>247) 
+                                        
+: IF-COEF                               
+   0 SIGNAL !                           
+   ' ?VAR   TRAV-INIT @LT TRAV          
+   SIGNAL @ @NUM 1 = NOT                
+   ==>                                  
+   0 TO VARNUL                          
+   SIGNAL @                             
+\  CR ." Divide by "                    
+\  DUP DUP @NUM SWAP @DENOM .N/D        
+   DUP @NUM SWAP @DENOM UDIV ;          
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 108
+(                        < 7/ 8/86>248) 
+                                        
+: INTERPRETER                           
+   :                                    
+   DOES>                                
+    0                                   
+    BEGIN DDUP 2* + @                   
+     DUP ' <EXIT> CFA =                 
+     IF DROP 0                          
+     ELSE EXECUTE NOT                   
+     THEN                               
+    WHILE 1+                            
+    REPEAT DDROP ;                      
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 109
+( SOLVER    PRINT SCREEN < 7/ 8/86>249) 
+                                        
+INTERPRETER LSOLVE                      
+  IF-*/        IF-CONS-LIKE             
+  IF-VARS-LIKE IF-LT-CONSTANT           
+  IF-COEF      IF-RT-VARS ;             
+                                        
+: 1SOLVE                                
+   0 SOLVED !                           
+   LSOLVE ?SOLVED                       
+   <TPRINT> ;                           
+                                        
+: SOLVE                                 
+   BEGIN                                
+    1SOLVE                              
+    SOLVED @                            
+   UNTIL ;                              
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 110
+( SOLVER LOAD            < 0/ 0/ 0>250) 
+\ SOLVER VIRTUAL                        
+        FORTH DEFINITIONS               
+    FORGET-SYS                          
+\ \ \ \ \ \  \ \ \                      
+\ SCREEN 248 IS THE PRINT SCREEN        
+\  PRINT 140 239 AND 250 261            
+\   278 LOAD \ .S                       
+                                        
+251 261  THRU                           
+\ : DBOS1 ;                             
+CR CR CR                                
+." *****************************"       
+CR ." THE SOLVER IS LOADED "            
+CR ." TYPE EMPTY-BUFFERS SAVE-FORTH"    
+CR ." THEN LOAD THE OPDB PART 1 DISK"   
+CR ." FROM SCREEN 141 "                 
+CR ." *****************************"    
+CR CR CR                                
+EXIT                                    
+\ \ \ \ \ \ \ \  \ \ \                  
+\ \ \ \ \ \ \ \ \                       
+                                        
+                                        
+-------------------------------------------- SCREEN 111
+( SOLVER                 < 0/ 0/ 0>251) 
+                                        
+                                        
+\ \ \ \ \                               
+                                        
+\ \ \ \ \ \ \ \ \ \  \ \ \              
+                                        
+                                        
+\ \ \ \ \ \ \ \ \ \  \ \ \              
+\ \ \ \ \ \ \ \ \ \  \ \ \              
+\ \ \ \ \ \ \ \ \ \  \ \ \              
+\ \ \ \ \ \ \ \ \ \  \ \ \              
+\ \ \ \ \ \ \ \ \ \  \ \ \              
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 112
+( SOLVER                 < 0/ 0/ 0>252) 
+                                        
+10 TO WIDTH                             
+( **************************** )        
+( WIDTH MUST BE SET TO AT LEAST 10 )    
+( FOR VIR-CHK  SEE 87 ON )              
+( VIRTUAL LOADER DISK )                 
+( **************************** )        
+                                        
+VIRTUAL                                 
+SECS/TRK TRKS/HD  * 1- NEXT-SECTOR !    
+\ SOLVE-NEXT @   NEXT-SECTOR  !         
+                                        
+DECIMAL FORGET-SYS                      
+                                        
+FREEZE VIRTUAL VIR-BASE DP !            
+                                        
+VIR-TST FORTH CONSTANT VIR-CHK          
+                                        
+VIRTUAL                                 
+LATEST PFA-LFA ' SOLVE-FIRSTLFA !       
+FORTH CR CR                             
+                                        
+                                        
+-------------------------------------------- SCREEN 113
+( SOLVER                 < 0/ 0/ 0>253) 
+                                        
+\ \ \ \ \ \ \ \ \ \  \ \ \              
+\ \ \ \ \ \ \ \ \ \ \ \ \               
+\ \ \ \ \ \ \ \ \ \  \ \ \              
+\ \ \ \ \ \ \ \ \ \  \ \ \              
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 114
+( SOLVE-SYS, GET-SOLVE   < 0/ 0/ 0>254) 
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 115
+(                        < 0/ 0/ 0>255) 
+                                        
+                                        
+\ \ \ \ \                               
+\ \ \ \ \ \ \ \ \ \  \ \ \              
+\ \ \ \ \ \ \ \ \ \  \ \ \              
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 116
+( INSTRUCTIONS           < 0/ 0/ 0>256) 
+CR CR                                   
+\                                       
+\                                       
+\ \ \ \ \ \ \ \ \ \ \ \ \  \            
+                                        
+CR ." THE SOLVER CODE IS LOADING "      
+FORTH DEFINITIONS                       
+HERE                                    
+140 LOAD    \ VARIABLE/CONSTANTS        
+146 LOAD                                
+HERE SWAP - ." BYTES = " U.             
+20 TO WIDTH                             
+CR ." THE SOLVER IS LOADED  "           
+CR ." I HOPE????            "           
+CR                                      
+                                        
+                                        
+                                        
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 117
+( INSTALL SOLVE          < 0/ 0/ 0>257) 
+                                        
+   VIRTUAL                              
+                                        
+   LATEST PFA-LFA ' SOLVE-LASTLFA !     
+   ( SAVE LFA OF LAST WORD IN SOLVE )   
+                                        
+   FORTH                                
+                                        
+   ICEBOX @ VOC-LINK !                  
+( REMOVE ANY ADDED VOC FROM VOC-LINKAGE)
+                                        
+   ICEBOX 2+ @ DP !                     
+   ( RESTORE PRIOR DP )                 
+                                        
+   ICEBOX 4 + @ CONTEXT @ ! DEFINITIONS 
+   ( RESTORE PRIOR LATESTLFA )          
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( GRW)   
+-------------------------------------------- SCREEN 118
+(  SOLVER                < 0/ 0/ 0>258) 
+                                        
+   FORGET-SYS VIRTUAL 2 SYS-FLG !       
+                                        
+   SYS-LINK1  SOLVE-FIRSTLFA !          
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 119
+( INSTALL SOLVE          < 0/ 0/ 0>259) 
+                                        
+                                        
+                                        
+   SOLVE-LASTLFA SYS-LINK2 !            
+                                        
+   FORTH                                
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 120
+( INSTALL SOLVE          < 0/ 0/ 0>260) 
+                                        
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 121
+( INSTALL SOLVE  <CONCLD>< 0/ 0/ 0>261) 
+   VIRTUAL                              
+   SOLVE-RWTS VIR-BASE                  
+     OVER ! ( ADDR )                    
+   6 OVER 2+ !               ( SLOT 6 ) 
+   NEXT-SECTOR @ SOLVE-SECTS -          
+   DUP NEXT-SECTOR ! ( UPDATE NEXT-SEC) 
+   1+ SECS/TRK /MOD 0 4 PICK 4 + !      
+                           ( DRV 0   )  
+   3 PICK 8 + ! OVER 6 + ! ( TRK&SEC )  
+   @RWTS-PARAM 0 SOLVE-SECTS RWTS       
+   ( SAVE A&E TO DISK )                 
+   FORGET-SYS CR CR                     
+CR ." THE SOLVER  IS INSTALLED" CR      
+CR ." ON THE DISK             " CR      
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 122
+( PRINT TEST WORDS       < 7/ 7/86>262) 
+\ FORGET NLEV                           
+                                        
+VARIABLE NLEV  \ current nest level     
+VARIABLE PNLEV \ print next level       
+                                        
+\ if op is * or / and child is not      
+\ a integer constant return true        
+\ if L/R=T check left else right        
+: ?NEST ( NADD L/R -- F'; )             
+   >R DUP @KIND 3 =                     
+   IF DUP @VAROP                        
+    DUP MULT = SWAP DIV = OR            
+    IF R@                               
+     IF @LT ELSE @RT THEN               
+     DUP >R @KIND OP = NOT \ is it a    
+     R> @DENOM ABS 1 =  \ int coef ?    
+     AND NOT                            
+    ELSE DROP 0 THEN                    
+   ELSE DROP 0 THEN                     
+   R> DROP ;                            
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 123
+( PRINT TEST WORDS       < 7/ 8/86>263) 
+VARIABLE PMSIGN \ temp holding place    
+\ for +- signs  0=none 1=plus 2=minus   
+                                        
+: .P/M \ F -- ; print proper sign       
+   \ f=1 means invert stored value      
+  PMSIGN @ ?DUP                         
+  IF 1- XOR                             
+   IF MINUS ELSE PLUS THEN              
+   EMIT 0 PMSIGN !                      
+  ELSE IF MINUS EMIT THEN               
+  THEN ;                                
+                                        
+\ compares NLEV and PNLEV and           
+\ prints correct paren if needed        
+: .PARENS ( -- )                        
+  BEGIN NLEV @ PNLEV @ >                
+  WHILE 0 .P/M 40 EMIT 1 PNLEV +!       
+  REPEAT                                
+  BEGIN NLEV @ PNLEV @ <                
+  WHILE 0 .P/M 41 EMIT -1 PNLEV +!      
+  REPEAT ;                              
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 124
+( PRINT TEST WORDS       < 7/ 8/86>264) 
+\ prints operators                      
+\ if + or - check if right child is     
+\ not an operator. If it is not move    
+\ sign out from coef and set PRABS?     
+: PROP \ NADDR -- ;                     
+  @VAROP                                
+  DUP PLUS = OVER MINUS = OR            
+  IF MINUS = 1+ PMSIGN !                
+  ELSE DUP EQUALS =                     
+   IF SPACE EMIT SPACE                  
+   ELSE EMIT                            
+   THEN                                 
+  THEN ;                                
+                                        
+: NEST ( NADR L/R -- )                  
+   ?NEST NLEV +! ;                      
+                                        
+: UNNEST ( NADR L/R -- )                
+   ?NEST NEGATE NLEV +! ;               
+                                        
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 125
+( PRINT TEST WORDS       < 7/ 7/86>265) 
+                                        
+: PRNODE  ( NADR -- )                   
+   .PARENS >R                           
+   R@ @DENOM 0<                         
+   R@ @NUM 0< XOR .P/M                  
+   R@ @DENOM ABS 1 =                    
+   IF R@ @NUM ABS DUP 1 =               
+    R@ @KIND VAR = AND                  
+    IF DROP ELSE .# THEN                
+   ELSE R@ @NUM ABS .# DIV EMIT         
+    R@ @DENOM .#                        
+   THEN                                 
+   R@ @KIND VAR =                       
+   IF R@ @VAROP                         
+    DUP ASCII A ASCII Z WITHIN          
+    IF 32 + THEN EMIT                   
+   THEN                                 
+   R> DROP ;                            
+                                        
+                                        
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 126
+( PRINT TEST WORDS       < 7/ 7/86>266) 
+                                        
+: <PTREE> ( ADR -- )                    
+   [ SMUDGE ] \ allow recursive calls   
+   DUP 1 NEST DUP @LT                   
+   DUP @KIND OP =                       
+   IF <PTREE> ELSE PRNODE THEN          
+   DUP 1 UNNEST .PARENS                 
+   DUP PROP                             
+   DUP 0 NEST .PARENS                   
+   DUP @RT DUP @KIND OP =               
+   IF <PTREE>                           
+   ELSE PRNODE                          
+   THEN                                 
+   0 UNNEST .PARENS                     
+; SMUDGE                                
+                                        
+: PTREE ( ADR -- )                      
+  0 NLEV ! 0 PNLEV ! 0 PMSIGN !         
+  <PTREE> ;                             
+                                        
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 127
+( (TPRINT  LPRINT RPRINT < 7/ 8/86>267) 
+                                        
+: (TPRINT) \ -- ; print entire tree     
+   ROOT @ PTREE ;                       
+                                        
+: LPRINT \ -- ; print left side         
+   ROOT @ @LT PTREE ;                   
+                                        
+: RPRINT \ -- ; print right side        
+   ROOT @ @RT PTREE ;                   
+                                        
+: NPRINT                                
+   ' NOOP CFA TO <TPRINT> ;             
+                                        
+: TPRINT                                
+   ' (TPRINT) CFA TO <TPRINT> ;         
+                                        
+' (TPRINT) CFA TO PRINT                 
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( FAH  ) 
+-------------------------------------------- SCREEN 128
+(                        < 0/ 0/ 0>268) 
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( GRW)   
+-------------------------------------------- SCREEN 129
+(                        < 0/ 0/ 0>269) 
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( GRW)   
+-------------------------------------------- SCREEN 130
+( START OF TCODE PLANT   < 0/ 0/ 0>270) 
+\ RESIDENT ANIMATION TCODES             
+\  0 TEX !                              
+'  CARSTART  255 240   TPLANT           
+'  TWIN      255 241   TPLANT           
+'  CAR1ON    255 242   TPLANT           
+'  CAR2ON    255 243   TPLANT           
+'  NOCAR     255 244   TPLANT           
+'  CARGET    255 245   TPLANT           
+'  TIMEON    255 246   TPLANT           
+'  TIMEOFF   255 247   TPLANT           
+'  CLRTIMER  255 248   TPLANT           
+'  (ANIMATE) 255 249   TPLANT           
+'  CAR1      255 250   TPLANT           
+'  CAR2      255 251   TPLANT           
+'  SETSPEED  255 252   TPLANT           
+'  ?WIN      255 253   TPLANT           
+'  SWIN      255 254   TPLANT           
+\ TCODE 254 SETS SOLVER WINDOW          
+\ TCODE 241 SETS NORMAL WINDOW          
+                                        
+\ \ \ \ \ \ \ \ \ \                     
+\ \ \ \ \ \ \ \ \ \                     
+                                        
+-------------------------------------------- SCREEN 131
+(                        < 0/ 0/ 0>271) 
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( GRW)   
+-------------------------------------------- SCREEN 132
+( ID.                    < 0/ 0/ 0>272) 
+: ID. DUP C@ 31 AND SWAP                
+     BEGIN SWAP 1- SWAP 1+ DUP C@ DUP   
+      127 AND EMIT 128 AND              
+     UNTIL DROP ?DUP                    
+     IF 0 DO 94 EMIT LOOP               
+     THEN 32 EMIT ;                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( GRW)   
+-------------------------------------------- SCREEN 133
+(                        < 0/ 0/ 0>273) 
+: (.MYSELF)  CR ID. ;                   
+: 'MYSELF (.MYSELF)  ;                  
+: .MYSELF     LATEST                    
+              [COMPILE] LITERAL         
+              COMPILE 'MYSELF           
+               ; IMMEDIATE              
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( GRW)   
+-------------------------------------------- SCREEN 134
+(                        < 0/ 0/ 0>274) 
+                                        
+                                        
+GET-SOLVE 4 GET-OVERLAY                 
+                                        
+: Q 1STEPSEL CR PRINT SOLVED? T/F .     
+    SOLVE ;                             
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( GRW)   
+-------------------------------------------- SCREEN 135
+(                        < 8/ 2/85>275) 
+                                        
+: .1VARS ( -- )                         
+                                        
+CR                                      
+CR NEW-NODE   @ 8 U.R ."  NEW-NODE    " 
+   CUR-NODE   @ 8 U.R ."  CUR-NODE"     
+CR NUM-NODES  @ 8 U.R ."  NUM-NODES   " 
+   TPTR       @ 8 U.R ."  TPTR"         
+CR #PAR       @ 8 U.R ."  #PAR        " 
+   NUM-SAVE   @ 8 U.R ."  NUM-SAVE"     
+CR DENOM-SAVE @ 8 U.R ."  DENOM-SAVE  " 
+   #NODE      @ 8 U.R ."  #NODE"        
+CR OP-SAVE    @ 8 U.R ."  OP-SAVE     " 
+   RDIST<-OK  @ 8 U.R ."  RDIST<-OK"    
+CR DIST<-OK   @ 8 U.R ."  DIST<-OK    " 
+   L-DENOM    @ 8 U.R ."  L-DENOM"      
+CR LDIST<-OK  @ 8 U.R ."  LDIST<-OK   " 
+   ?MUL       @ 8 U.R ."  ?MUL"         
+CR ?DIST<     @ 8 U.R ."  ?DIST<      " 
+   ?CLT       @ 8 U.R ."  ?CLT"         
+CR ?TCOMB     @ 8 U.R ."  ?TCOMB      " 
+   L-KIND     @ 8 U.R ."  L-KIND" ;     
+                               ( GRW)   
+-------------------------------------------- SCREEN 136
+(                        < 8/ 2/85>276) 
+                                        
+: .2VARS ( -- )                         
+                                        
+CR <?COMB>   @ 8 U.R ."  <?COMB>     "  
+   ?CM       @ 8 U.R ."  ?CM"           
+CR DENOM-R   @ 8 U.R ."  DENOM-R     "  
+   KIND-R    @ 8 U.R ."  KIND-R"        
+CR NUM-R     @ 8 U.R ."  NUM-R       "  
+   L-NUM     @ 8 U.R ."  L-NUM"         
+CR L-R       @ 8 U.R ."  L-R         "  
+   RT-LEAF   @ 8 U.R ."  RT-LEAF"       
+CR RT-NODE   @ 8 U.R ."  RT-NODE     "  
+   ?DEL-NEG  @ 8 U.R ."  ?DEL-NEG"      
+CR #VAR      @ 8 U.R ."  #VAR        "  
+   ABS-RT-CHILD                         
+             @ 8 U.R ."  ABS-RT-CHILD"  
+CR CONFLAG   @ 8 U.R ."  CONFLAG     "  
+   CONPLACE  @ 8 U.R ."  CONPLACE"      
+CR #NONPLUS  @ 8 U.R ."  #NONPLUS    "  
+   VCOUNT    @ 8 U.R ."  VCOUNT"        
+CR FOUND     @ 8 U.R ."  FOUND       "  
+  IGNORE-SUC @ 8 U.R ."  IGNORE-SUC" ;  
+                               ( GRW)   
+-------------------------------------------- SCREEN 137
+(                        < 8/ 2/85>277) 
+                                        
+: .3VARS ( -- )                         
+                                        
+CR PNODE    @ 8 U.R ."  PNODE       "   
+   SUBROOT  @ 8 U.R ."  SUBROOT"        
+CR RT-SAVE  @ 8 U.R ."  RT-SAVE     "   
+   CANCELS  @ 8 U.R ."  CANCELS"        
+CR SOLVED   @ 8 U.R ."  SOLVED      "   
+   ROOT     @ 8 U.R ."  ROOT" ;         
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( GRW)   
+-------------------------------------------- SCREEN 138
+(                        < 8/ 2/85>278) 
+                                        
+: .VARS                                 
+    .1VARS .2VARS .3VARS ;              
+: .NODES  ( -- )                        
+                                        
+    CR CR                               
+    CR PRINT                            
+    CR CR                               
+    ."                     "            
+    ."   KIND   NUM DENOM VAROP  PRED"  
+    ."    L/R    LT    RT   PAR  PL/R"  
+    CR CR                               
+    30 0 DO                             
+          ." NODE "                     
+          NODES I LEN * + U. ." -- "    
+          LEN 0 DO                      
+                  NODES J LEN * +       
+                  I + @ 6 U.R           
+                  2 +LOOP CR            
+         LOOP                           
+    .VARS                               
+    12 EMIT ;                           
+                                        
+-------------------------------------------- SCREEN 139
+(                        < 2/11/85>278) 
+-1 CONSTANT .SS                         
+                                        
+: .S CR DEPTH IF                        
+     .SS IF                             
+       SP@ 2- S0 2-                     
+     ELSE                               
+       SP@ S0 SWAP                      
+     THEN DO                            
+       I @ 0 D. 2 .SS +-                
+     +LOOP                              
+   ELSE                                 
+     ." EMPTY STACK"                    
+   THEN                                 
+   CR ;                                 
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( 15:33) 

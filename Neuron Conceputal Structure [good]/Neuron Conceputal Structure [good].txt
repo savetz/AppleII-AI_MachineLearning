@@ -1,0 +1,775 @@
+-------------------------------------------- SCREEN 000
+(                        <12/13/86>140) 
+                                        
+FORGET WALL                             
+                                        
+: WALL ;                                
+                                        
+\ Neuron                                
+                                        
+200 212 THRU                            
+                                        
+                                        
+EXIT                                    
+                                        
+\ Conceptual structures                 
+                                        
+150 161 THRU                            
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 010
+(                        <12/13/86>150) 
+                                        
+: CONCEPT                               
+    CREATE 0 , 0 , 0 ,                  
+    DOES> ;                             
+                                        
+CONCEPT CAT                             
+CONCEPT MAT                             
+CONCEPT FLOOR                           
+CONCEPT TABLE                           
+                                        
+: RELATION                              
+    CREATE                              
+    DOES> , HERE DUP                    
+          FIND DUP 2+ @ ,               
+               DUP , 2+ !               
+          FIND DUP 4 + @ ,              
+               DUP , 4 + ! ;            
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 011
+(                        <12/13/86>151) 
+                                        
+RELATION SAT-ON                         
+                                        
+SAT-ON CAT MAT                          
+SAT-ON CAT FLOOR                        
+SAT-ON CAT TABLE                        
+                                        
+EXIT                                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 012
+(                        <12/13/86>152) 
+                                        
+: .RELATION ( adr-rlink -- )            
+    2- @ NFA ID. ;                      
+                                        
+: .AGENT  ( adr-rlink -- )              
+    2+ @ NFA ID. ;                      
+                                        
+: .PATIENT  ( adr-rlink -- )            
+    6 + @ NFA ID. ;                     
+                                        
+: .RELATIONSHIP   ( ADR-RLINK -- )      
+    DUP .RELATION                       
+        .PATIENT ;                      
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 013
+(                        <12/13/86>153) 
+                                        
+: WHAT                                  
+   CR                                   
+   FIND DUP NFA ID.                     
+        2+                              
+        BEGIN                           
+          @ DUP 0>                      
+        WHILE                           
+          CR 3 SPACES                   
+          DUP .RELATIONSHIP             
+        REPEAT                          
+        DROP ;                          
+                                        
+WHAT CAT                                
+                                        
+: .AGENCY     ( ADR-RLINK -- )          
+    DUP .AGENT                          
+        .RELATION ;                     
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 014
+(                        <12/13/86>154) 
+                                        
+: WHO                                   
+   CR                                   
+   FIND DUP NFA ID.                     
+        BEGIN                           
+          4 + @ DUP 0>                  
+        WHILE                           
+          CR 3 SPACES                   
+          DUP .AGENCY                   
+        REPEAT                          
+        DROP ;                          
+                                        
+WHO MAT                                 
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 015
+(                        <12/13/86>155) 
+                                        
+\ CONCEPT NODE                          
+                                        
+: TYPE>      ( adr -- adr )     ;       
+                                        
+: RELATIONS> ( adr -- adr ) TYPE> 2+  ; 
+                                        
+: >RELATIONS ( adr -- adr ) TYPE> 4 + ; 
+                                        
+: ID>        ( adr -- adr ) TYPE> 6 + ; 
+                                        
+8 CONSTANT CNODE-SIZE                   
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 016
+(                        <12/13/86>156) 
+                                        
+\ RELATION NODE                         
+                                        
+\ TYPE>                                 
+                                        
+: N-ADIC     ( adr -- adr ) 2+  ;       
+                                        
+: 1LINK  ( adr -- adr ) 4 + ;           
+                                        
+: 2LINK  ( adr -- adr ) 6 + ;           
+                                        
+: 3LINK  ( adr -- adr ) 8 + ;           
+                                        
+: LEN-RNODE  ( n1 -- n2 )               
+   2* 4 + ;                             
+                                        
+: RNODE-SIZE ( adr -- n )               
+   N-ADIC @ LEN-RNODE ;                 
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 017
+(                        <12/13/86>157) 
+                                        
+1000 CONSTANT EXTENT                    
+                                        
+CREATE BLACKBOARD EXTENT ALLOT          
+                                        
+VARIABLE FREESPACE                      
+                                        
+BLACKBOARD FREESPACE !                  
+                                        
+: FILLED? ( n -- )                      
+   FREESPACE @   +                      
+   BLACKBOARD EXTENT + >                
+   ABORT" Full blackboard!" ;           
+                                        
+: RESERVE  ( n -- )                     
+   FREESPACE @                          
+   OVER FILLED?                         
+   DUP ROT + FREESPACE ! ;              
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 018
+(                        <12/13/86>158) 
+                                        
+VARIABLE CNODES                         
+                                        
+0 CNODES !                              
+                                        
+: GET-CNODE   ( -- adr )                
+   CNODES @ 0 >                         
+   IF                                   
+     CNODES @ DUP @ CNODES !            
+   ELSE                                 
+     CNODE-SIZE RESERVE                 
+   THEN ;                               
+                                        
+: FREE-CNODE  ( adr -- )                
+   CNODES @ OVER ! CNODES ! ;           
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 019
+(                        <12/13/86>159) 
+                                        
+VARIABLE RNODES                         
+                                        
+0 RNODES !                              
+                                        
+: =ADIC? ( n adr -- f )                 
+    N-ADIC @ = ;                        
+                                        
+: UNLINK  ( adr1 -- adr2 )              
+    \ Unlink from node from list given  
+    \ pointer                           
+    DUP @ DUP >R                        
+    @ SWAP !  R> ;                      
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 020
+(                        <12/13/86>160) 
+                                        
+: RNODE?  ( n adr -- adr )              
+    BEGIN                               
+      DUP @ DUP 0=                      
+      IF    DDROP DROP 0 1              
+      ELSE  SWAP >R DDUP =ADIC?         
+            IF   DDROP R> UNLINK 1      
+            ELSE R> DROP 0              
+            THEN                        
+      THEN                              
+    UNTIL ;                             
+                                        
+: GET-RNODE  ( n -- adr )               
+    DUP RNODES RNODE?                   
+    DUP 0=                              
+    IF   DROP DUP LEN-RNODE RESERVE     
+         DUP >R N-ADIC ! R>             
+    ELSE SWAP DROP                      
+    THEN ;                              
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 021
+(                        <12/13/86>161) 
+                                        
+: FREE-RNODE  ( adr -- )                
+   RNODES @ OVER ! RNODES ! ;           
+                                        
+: COPYCONCEPT ( cfa -- adr )            
+    GET-CNODE                           
+    DDUP !                              
+    DUP >R                              
+    2+ 6 CMOVE R> ;                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 030
+(                        <12/13/86>170) 
+                                        
+: WALL ;                                
+                                        
+: CONCEPT                               
+    CREATE 0 , 0 , 0 ,                  
+    DOES> ;                             
+                                        
+\ RELATIONS> | >RELATIONS | ID>         
+                                        
+CONCEPT CAT                             
+CONCEPT MAT                             
+CONCEPT FLOOR                           
+CONCEPT TABLE                           
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 031
+(                        <12/13/86>171) 
+                                        
+: RELATION                              
+    CREATE ,                            
+    DOES> DUP , @ DUP , HERE            
+          SWAP DUP 1 > .S               
+          IF 1-                         
+             0 DO DUP  \ here here      
+                  FIND DUP 2+ @ ,       
+                  DUP , 2+ !            
+               LOOP                     
+          ELSE                          
+             DROP                       
+          THEN  .S                      
+          FIND DUP 4 + @ ,              
+               DUP , 4 + ! ;            
+                                        
+1 RELATION NEG                          
+2 RELATION SAT-ON                       
+3 RELATION BETWEEN                      
+                                        
+                                        
+EXIT                                    
+                                        
+-------------------------------------------- SCREEN 032
+(                        <12/13/86>172) 
+                                        
+                                        
+NEG CAT                                 
+                                        
+SAT-ON CAT MAT                          
+SAT-ON CAT FLOOR                        
+SAT-ON CAT TABLE                        
+                                        
+BETWEEN MAT TABLE CAT                   
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 060
+(                        <12/13/86>200) 
+                                        
+VARIABLE STEP                           
+VARIABLE VARIANCE                       
+400  CONSTANT SCALE                     
+10   CONSTANT MAXWEIGHT                 
+                                        
+VARIABLE RND   HERE RND !               
+: RANDOM RND @ 31421 * 6927 +           
+         DUP RND ! ;                    
+: CHOOSE ( u1 -- u2 )                   
+    RANDOM U* SWAP DROP ;               
+                                        
+                                        
+: NEURON                                
+   CREATE 0 , 0 , 0 , 0 ,               
+        \ w0  w1  w2  w3                
+   DOES> >R DDUP                        
+         R@ @ 100 *                     
+         R@ 2+ @ 10 * ROT * +           
+         R@ 4 + @ 10 * ROT * +          
+         R> 6 + @ ROT * ROT * +         
+         SCALE / ;                      
+                                        
+-------------------------------------------- SCREEN 061
+(                        <12/13/86>201) 
+                                        
+10 STEP !                               
+10 VARIANCE !                           
+                                        
+: RANGE    ( u1 -- f )                  
+   DUP  MAXWEIGHT NEGATE <              
+   SWAP MAXWEIGHT > OR ;                
+                                        
+: REFLECT ( u1 -- u2 )                  
+   DUP RANGE                            
+   IF  DUP 0> IF   MAXWEIGHT MOD        
+                   MAXWEIGHT SWAP -     
+              ELSE MAXWEIGHT MOD        
+                   MAXWEIGHT NEGATE     
+                   SWAP -               
+              THEN                      
+   THEN ;                               
+                                        
+: 1ALTER  ( w1 -- w2 )                  
+   STEP @ VARIANCE @ CHOOSE 10 */       
+   2 CHOOSE IF + ELSE - THEN            
+   REFLECT ;                            
+                                        
+-------------------------------------------- SCREEN 062
+(                        <12/13/86>202) 
+                                        
+: SEE      ( adr -- )                   
+   \ Print weights of neuron adr        
+   4 0 DO  DUP @ 4 .R 2+                
+       LOOP DROP ;                      
+                                        
+: ALTER      ( adr -- )                 
+   \ Alter weights of neuron adr        
+   4 0 DO  DUP @ 1ALTER OVER ! 2+       
+       LOOP DROP ;                      
+                                        
+CREATE BEST 24 ALLOT                    
+                                        
+: >BEST ( adr1 adr2 adr3  -- )          
+   \ Save weights of neuron adr         
+   BEST 16 + 8 CMOVE                    
+   BEST  8 + 8 CMOVE                    
+   BEST      8 CMOVE ;                  
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 063
+(                        <12/13/86>203) 
+                                        
+: BEST> ( adr1 adr2 adr3 -- )           
+   \ Replace weights of neuron adr      
+   BEST 16 + SWAP 8 CMOVE               
+   BEST  8 + SWAP 8 CMOVE               
+   BEST      SWAP 8 CMOVE ;             
+                                        
+  NEURON BEE1                           
+  NEURON BEE2                           
+  NEURON BEE3                           
+                                        
+\ NEURON BEE                            
+                                        
+                                        
+: BEE ( x y -- o )                      
+   DDUP BEE1 >R                         
+        BEE2 R> BEE3 ;                  
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 064
+(                        <12/13/86>204) 
+                                        
+VARIABLE SCORE                          
+VARIABLE BESTYET                        
+                                        
+-1 BESTYET !                            
+0 SCORE !                               
+                                        
+                                        
+: REFINE                                
+   BESTYET @ 75 >                       
+   IF  BESTYET 90 >                     
+       IF   4 STEP !                    
+       ELSE 4 STEP !                    
+       THEN                             
+   THEN ;                               
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 065
+(                        <12/13/86>205) 
+                                        
+: IMPROVE ( -- )                        
+    SCORE @ BESTYET @ >                 
+    IF \ ' BEE  >BEST                   
+       ' BEE1 ' BEE2 ' BEE3 >BEST       
+       SCORE @ BESTYET !                
+       REFINE                           
+       CR ." Improvement! " BEEP        
+    ELSE                                
+     \ ' BEE BEST>                      
+       ' BEE1 ' BEE2 ' BEE3 BEST>       
+    THEN                                
+     \ ' BEE  ALTER ;                   
+       ' BEE1 ALTER                     
+       ' BEE2 ALTER                     
+       ' BEE3 ALTER ;                   
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 066
+(                        <12/13/86>206) 
+                                        
+\ Concept: Bee only stings short and    
+\          fat people                   
+\          where x (height) < 0         
+\          and   y (weight) < 0         
+                                        
+16 CONSTANT TRIALS                      
+                                        
+CREATE EXAMPLES TRIALS ,                
+                                        
+\ H     W  STING?   H      W  STING?    
+                                        
+ -10 , -10 , 1 ,   -10 ,  1  , -1 ,     
+ -10 , -1  , 1 ,    1  , -10 , -1 ,     
+ -8  , -8  , 1 ,    10 , -1  , -1 ,     
+ -5  , -5  , 1 ,   -1  ,  10 , -1 ,     
+ -3  , -1  , 1 ,    1  ,  1  , -1 ,     
+ -2  , -2  , 1 ,    10 ,  1  , -1 ,     
+ -1  , -10 , 1 ,    1  ,  10 , -1 ,     
+ -1  , -1  , 1 ,    10 ,  10 , -1 ,     
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 067
+(                        <12/13/86>207) 
+                                        
+\ Evaluation rules                      
+                                        
+\ if x*y is positive then SHORT&FAT     
+\ if x*y is negative then NOT SHORT*FAT 
+                                        
+\ if Output(act) * Output(ideal) is     
+\    positive then hit                  
+\ if Output(act) * Output(ideal) is     
+\    negative then miss                 
+                                        
+CREATE SKILL TRIALS , TRIALS 2* ALLOT   
+                                        
+: !TRIAL ( score trial -- )             
+    2* 2+ SKILL + ! ;                   
+                                        
+: @TRIAL ( trial -- score )             
+    2* 2+ SKILL + @ ;                   
+                                        
+: TRIAL ( n -- o )                      
+    6 * 2+ EXAMPLES + D@ BEE ;          
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 068
+(                        <12/13/86>208) 
+                                        
+: STING?  ( n -- f )                    
+   0< IF   0                            
+      ELSE 1                            
+      THEN ;                            
+                                        
+: @IDEAL  ( n -- I )                    
+   6 * 2+ EXAMPLES + 4 + @ ;            
+                                        
+VARIABLE ACCEPT                         
+VARIABLE -ACCEPT                        
+VARIABLE REJECT                         
+VARIABLE -REJECT                        
+                                        
+: NEWRUN                                
+    0 ACCEPT !   0 -ACCEPT !            
+    0 REJECT !   0 -REJECT !            
+    0 SCORE !  ;                        
+                                        
+NEWRUN                                  
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 069
+(                        <12/13/86>209) 
+                                        
+: EVALUATE ( trial# output -- score)    
+    STING? SWAP @IDEAL                  
+    0> IF   0> IF   1 1 ACCEPT  +!      
+               ELSE 0 1 -REJECT +!      
+               THEN                     
+       ELSE 0> IF   0 1 -ACCEPT  +!     
+               ELSE 1 1 REJECT +!       
+               THEN                     
+       THEN ;                           
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 070
+(                        <12/13/86>210) 
+                                        
+: SCORERUN  ( -- )                      
+   ACCEPT @  REJECT @ + 100 16 */       
+   DUP SCORE !                          
+   CR ." Performance score: " .         
+   CR ." Best yet: " BESTYET @ . ;      
+                                        
+: .TABLE                                
+                                        
+  CR                                    
+  ."  ACCEPT" ACCEPT  @ 4 .R 2 SPACES   
+  ." -REJECT" -REJECT @ 4 .R CR         
+  ." -ACCEPT" -ACCEPT @ 4 .R 2 SPACES   
+  ."  REJECT" REJECT  @ 4 .R CR ;       
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 071
+(                        <12/13/86>211) 
+                                        
+: TESTRUN  ( -- )                       
+    NEWRUN CR                           
+    EXAMPLES @                          
+    0 DO I TRIAL                        
+         I SWAP EVALUATE DROP           
+      LOOP                              
+    \ ' BEE  SEE CR                     
+      ' BEE1 SEE CR                     
+      ' BEE2 SEE CR                     
+      ' BEE3 SEE CR                     
+      .TABLE SCORERUN ;                 
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 072
+(                        <12/13/86>212) 
+                                        
+VARIABLE PERFECTION                     
+0 PERFECTION !                          
+                                        
+: LEARN                                 
+   30000 0 DO CR CR CR                  
+              ." RUN: " I .             
+              ." STEP: " STEP @ . CR    
+              TESTRUN                   
+              BESTYET @ 100 =           
+              IF LEAVE                  
+                 I PERFECTION !         
+              THEN                      
+              IMPROVE                   
+           LOOP ;                       
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 073
+(                        <12/13/86>213) 
+                                        
+EXIT                                    
+                                        
+: PEEK                                  
+   CR                                   
+   16 0 DO                              
+          I TRIAL DUP .                 
+          I SWAP EVALUATE  .            
+          ACCEPT @    .                 
+          CR KEY DROP                   
+        LOOP ;                          
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 080
+(                        <12/13/86>220) 
+                                        
+                                        
+                                        
+: TEST                                  
+   DOES>                                
+     DUP . DUP @ . 2+ @ . ;             
+                                        
+: SKY                                   
+   3905 , 0 , 0 , ;                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        

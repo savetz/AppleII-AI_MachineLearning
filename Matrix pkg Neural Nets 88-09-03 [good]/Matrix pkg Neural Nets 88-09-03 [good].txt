@@ -1,0 +1,2000 @@
+-------------------------------------------- SCREEN 000
+(                        <12/13/86>140) 
+                                        
+                                        
+FORGET WALL                             
+                                        
+  149 176 THRU                          
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 009
+(                        <12/13/86>149) 
+                                        
+: WALL ;                                
+                                        
+VARIABLE RND                            
+                                        
+HERE RND !                              
+                                        
+: RANDOM RND @ 31421 * 6927 +           
+         DUP RND ! ;                    
+                                        
+: CHOOSE ( u1 -- u2 )                   
+    RANDOM U* SWAP DROP ;               
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 010
+( NEURON1                <12/13/86>150) 
+                                        
+: MATRIX  ( defining: r c -- )          
+    \ Define matrix with r rows and     
+    \ c columns. Initialize with 0.     
+    CREATE                              
+     DDUP , , * 2*                      
+     HERE OVER 0 FILL                   
+     ALLOT                              
+    DOES> ;                             
+                                        
+: SIZE ( adr -- r c )                   
+   \ Given adr, return dimensions       
+   \ of matrix.                         
+   D@ SWAP ;                            
+                                        
+: ADR ( adr -- adr1 )                   
+    \ Given adr, return adr of cell     
+    \ 0 0                               
+    4 + ;                               
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 011
+(                        <12/13/86>151) 
+                                        
+: CELL ( r c adr -- adr1 )              
+   \ Return adr of cell in given matrix 
+   DUP SIZE DROP                        
+   2* SWAP         >R                   
+   ROT * SWAP 2* + R>                   
+   ADR + ;                              
+                                        
+EXIT                                    
+                                        
+\ Examples                              
+                                        
+3 2 MATRIX TEST                         
+                                        
+CR     TEST SIZE . .                    
+                                        
+CR     TEST ADR  .                      
+                                        
+CR     0 0 TEST CELL .                  
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 012
+(                        <12/13/86>152) 
+                                        
+: MAT@ ( r c adr -- n )                 
+   \ Fetch value from defined matrix    
+   CELL @ ;                             
+                                        
+: MAT! ( n r c adr -- )                 
+   \ Store value in defined matrix      
+   CELL ! ;                             
+                                        
+: MAT+! ( n r c adr -- )                
+   \ +Store value in defined matrix     
+   CELL +! ;                            
+                                        
+EXIT                                    
+                                        
+\ Examples                              
+                                        
+1 0 0 TEST MAT!                         
+6 2 1 TEST MAT!                         
+                                        
+CR     0 0 TEST MAT@ .                  
+CR     2 1 TEST MAT@ .                  
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 013
+(                        <12/13/86>153) 
+                                        
+0 CONSTANT ADRW                         
+0 CONSTANT ADRU                         
+0 CONSTANT ADRV                         
+0 CONSTANT ADRZ                         
+0 CONSTANT ROW                          
+0 CONSTANT COLUMN                       
+0 CONSTANT SCALAR                       
+                                        
+: SCA* ( n adr -- )                     
+   \ Multiply matrix adr by scalar n    
+   TO ADRV TO SCALAR   ADRV SIZE        
+   0 DO I OVER                          
+        0 DO                            
+            DUP  I ADRV MAT@            
+            SCALAR 1000 */              
+            OVER I ADRV MAT!            
+          LOOP DROP                     
+     LOOP DROP ;                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 014
+(                        <12/13/86>154) 
+                                        
+: MAT0  ( adr -- )                      
+   \ Create 0 matrix                    
+   0 SWAP SCA* ;                        
+                                        
+                                        
+: MATRND  ( adr -- )                    
+   \ Initialize matrix with random      
+   \ values                             
+   TO ADRV    ADRV SIZE                 
+   0 DO I OVER                          
+        0 DO 200 CHOOSE 100 -           
+             OVER I ADRV MAT!           
+            LOOP DROP                   
+          LOOP DROP ;                   
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 015
+(                        <12/13/86>155) 
+                                        
+: .MAT    ( adr -- )                    
+   \ Display matrix                     
+   TO ADRV   ADRV SIZE                  
+   0 DO I OVER CR                       
+        0 DO                            
+            DUP I ADRV MAT@             
+            5 .R                        
+            LOOP DROP                   
+          LOOP DROP ;                   
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 016
+(                        <12/13/86>156) 
+                                        
+: IN-PROD  ( adrw adri adro r c -- )    
+   \ Store inner product of row r       
+   \ of matrix w with column c of       
+   \ matrix i in column c of matrix o   
+   TO COLUMN TO ROW                     
+   TO ADRV TO ADRU TO ADRW              
+   ADRW SIZE DROP                       
+   0 DO  ROW I      ADRW MAT@           
+         I   COLUMN ADRU MAT@           
+\        1000 */                        
+         ROW COLUMN ADRV MAT+!          
+     LOOP ;                             
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 017
+(                        <12/13/86>157) 
+                                        
+: MAT* ( adrw adru adrv -- )            
+   \ Multiply matrix w by matrix u      
+   \ and store result in matrix v.      
+   \ v must have same number of rows    
+   \ as w and same number of columns    
+   \ as u.                              
+   DUP MAT0                             
+   TO ADRV TO ADRU TO ADRW              
+   ADRU SIZE DROP                       
+   0 DO                                 
+      I TO COLUMN                       
+      ADRW SIZE SWAP DROP               
+      0 DO                              
+         I TO ROW                       
+         ADRW ADRU ADRV ROW COLUMN      
+         IN-PROD                        
+        LOOP                            
+     LOOP ;                             
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 018
+(                        <12/13/86>158) 
+                                        
+: MATPROD ( adru adrv adrz -- )         
+   \ Multiply each cell in matrix u     
+   \ by corresponding value in matix v  
+   \ and return result in matrix z.     
+   \ Assumes adru and adrv are the      
+   \ same size.                         
+   TO ADRZ TO ADRV TO ADRU              
+   ADRV SIZE                            
+   0 DO I OVER                          
+      0 DO DUP  I ADRU MAT@             
+           OVER I ADRV MAT@ 1000 */     
+           OVER I ADRZ MAT!             
+        LOOP  DROP                      
+     LOOP DROP ;                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 019
+(                        <12/13/86>159) 
+                                        
+: OUTPROD  ( adru adrv adrw -- )        
+   \ Compute outer product of           
+   \ vector u with vector v. Return     
+   \ result in matrix w.                
+   TO ADRW TO ADRV TO ADRU              
+   ADRU SIZE SWAP DROP                  
+   0 DO I  ADRV SIZE SWAP DROP          
+      0 DO  DUP 0 ADRU MAT@             
+              I 0 ADRV MAT@ 1000 */     
+           OVER I SWAP ADRW MAT!        
+        LOOP DROP                       
+     LOOP ;                             
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 020
+(                        <12/13/86>160) 
+                                        
+: MAT+  ( adru adrv -- )                
+   \ Add matrix u to matrix v           
+   \ returning result in matrix u.      
+   \ Assumes adru and adrv are the      
+   \ same size.                         
+   TO ADRV TO ADRU                      
+   ADRV SIZE                            
+   0 DO I OVER                          
+      0 DO DUP  I ADRU MAT@             
+           OVER I ADRV MAT@ +           
+           OVER I ADRU MAT!             
+        LOOP  DROP                      
+     LOOP DROP ;                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 021
+(                        <12/13/86>161) 
+                                        
+: MAT-  ( adru adrv -- )                
+   \ Subtract matrix v from matrix u    
+   \ Leave result in matrix u           
+   TO ADRV TO ADRU                      
+   ADRV SIZE                            
+   0 DO I OVER                          
+      0 DO DUP  I ADRU MAT@             
+           OVER I ADRV MAT@ -           
+           OVER I ADRU MAT!             
+        LOOP  DROP                      
+     LOOP DROP ;                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 022
+(                        <12/13/86>162) 
+                                        
+: ENTER ( n1 ... nn adr -- )            
+   TO ADRV   ADRV SIZE 1-               
+   -1 SWAP DO I OVER 1-                 
+              -1 SWAP DO ROT  OVER I    
+                       ADRV MAT!        
+                      -1                
+                      +LOOP DROP        
+            -1                          
+            +LOOP DROP ;                
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 023
+(                        <12/13/86>163) 
+                                        
+: TRANSFER  ( adru adrv -- )            
+   \ Copy matrix u to matrix v          
+   TO ADRV TO ADRU                      
+   ADRV SIZE                            
+   0 DO I OVER                          
+      0 DO DUP  I ADRU MAT@             
+           OVER I ADRV MAT!             
+        LOOP  DROP                      
+     LOOP DROP ;                        
+                                        
+EXIT                                    
+                                        
+Next step is to write o = f(a).         
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 024
+(                        <12/13/86>164) 
+                                        
+\ Output function -- transform          
+\ linear activation value to sigmoid    
+\ value between 0 and 1                 
+                                        
+CREATE OTAB1 500 , 487 , 475 , 463 ,    
+             450 , 438 , 426 , 413 ,    
+             401 , 389 , 378 , 366 ,    
+             354 , 343 , 332 , 321 ,    
+             310 , 299 , 289 , 279 ,    
+                                        
+CREATE OTAB2 269 , 250 , 231 , 214 ,    
+             198 , 179 , 168 , 154 ,    
+             142 , 130 , 119 , 109 ,    
+             100 ,  91 ,  83 ,  76 ,    
+              69 ,  63 ,  57 ,  52 ,    
+              47 ,  43 ,  39 ,  36 ,    
+              32 ,  29 ,  27 ,  24 ,    
+              21 ,  20 ,  18 ,  16 ,    
+              15 ,  13 ,  12 ,  11 ,    
+              10 ,   9 ,   8 ,   7 ,    
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 025
+(                        <12/13/86>165) 
+                                        
+: 1LOOKUP  ( n1 -- n2 )                 
+    \ Assumes n1 is between 0 and 100   
+    5 /MOD 2* OTAB1 +                   
+    OVER 5 < NOT                        
+    IF 2+ THEN @                        
+    SWAP 23 * 10 / - ;                  
+                                        
+                                        
+: 2LOOKUP  ( n1 -- n2 )                 
+    \ Assumes n1 between 100 and 500    
+    100 -                               
+    10 /MOD 2* OTAB2 + @                
+    SWAP OVER 12 / * 10 / - ;           
+                                        
+: 3LOOKUP  ( n1 -- n3 )                 
+    \ Assumes n1 if greater than 500    
+    650 MIN 800 SWAP -                  
+    DUP DUP 10 */ SWAP 6 *              
+    - 1000 / ;                          
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 026
+(                        <12/13/86>166) 
+                                        
+: LOOKUP  ( n1 -- n2 )                  
+   \ Given activation value, lookup     
+   \ value of f(activation)             
+   DUP ABS                              
+       DUP 100 < IF  1LOOKUP    ELSE    
+       DUP 500 < IF  2LOOKUP    ELSE    
+                     3LOOKUP            
+                  THEN THEN             
+       SWAP 0< IF 1000 SWAP - THEN ;    
+                                        
+: F(ACT) ( adr -- )                     
+   TO ADRV                              
+   ADRV SIZE                            
+   0 DO I OVER                          
+      0 DO I OVER ADRV MAT@ LOOKUP      
+           OVER I SWAP ADRV MAT!        
+        LOOP  DROP                      
+     LOOP DROP ;                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 027
+(                        <12/13/86>167) 
+                                        
+250 CONSTANT LRATE                      
+                                        
+: DERIV  ( n1 -- n2 )                   
+   \ Derivative of output function      
+   \ Opj(1 - Opj)                       
+   DUP 1000 SWAP - 1000 */ ;            
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 028
+(                        <12/13/86>168) 
+                                        
+: F'     ( adru adrv -- )               
+   \ Compute derivatives of values      
+   \ in matrix u. Return in matrix v.   
+   TO ADRV TO ADRU                      
+   ADRV SIZE                            
+   0 DO I OVER                          
+      0 DO DUP  I ADRU MAT@ DERIV       
+           OVER I ADRV MAT!             
+        LOOP  DROP                      
+     LOOP DROP ;                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 029
+(                        <12/13/86>169) 
+                                        
+\ Define a specific network and         
+\ learning experiment: XOR              
+                                        
+3 1 MATRIX INPUT                        
+                                        
+1 3 MATRIX 1WEIGHT                      
+1 3 MATRIX 1TEMP                        
+                                        
+1WEIGHT MATRND                          
+                                        
+1 1 MATRIX HIDDEN                       
+1 1 MATRIX F'HIDDEN                     
+1 1 MATRIX HERROR                       
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 030
+(                        <12/13/86>170) 
+                                        
+4 1 MATRIX TIER                         
+                                        
+1 4 MATRIX 2WEIGHT                      
+1 4 MATRIX 2TEMP                        
+                                        
+2WEIGHT MATRND                          
+                                        
+1 1 MATRIX OUTPUT                       
+1 1 MATRIX GOAL                         
+1 1 MATRIX ODELTA                       
+1 1 MATRIX F'OUT                        
+1 1 MATRIX OERROR                       
+                                        
+                                        
+4 1 MATRIX ERRORS                       
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 031
+(                        <12/13/86>171) 
+                                        
+: >TIER    ( -- )                       
+   0 0 HIDDEN MAT@                      
+   0 2 TIER MAT! ;                      
+                                        
+: OERR  ( -- )                          
+   \ Compute error value for output     
+   \ unit.                              
+   \ (t(pj)-o(pj)o(pj)(1-o(pj))         
+   GOAL ODELTA TRANSFER                 
+   ODELTA OUTPUT MAT-                   
+   OUTPUT F'OUT F'                      
+   ODELTA F'OUT OERROR MATPROD ;        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 032
+(                        <12/13/86>172) 
+                                        
+: ACTIVATE  ( -- )                      
+   1WEIGHT INPUT HIDDEN MAT*            
+   HIDDEN F(ACT)                        
+   >TIER                                
+   2WEIGHT TIER OUTPUT MAT*             
+   OUTPUT F(ACT) OERR ;                 
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 033
+(                        <12/13/86>173) 
+                                        
+: CASE1  ( -- )                         
+     0    0 1000      INPUT ENTER       
+     0    0    0 1000 TIER  ENTER       
+     0                GOAL  ENTER ;     
+                                        
+: CASE2  ( -- )                         
+     0 1000 1000      INPUT ENTER       
+     0 1000    0 1000 TIER  ENTER       
+  1000                GOAL  ENTER ;     
+                                        
+: CASE3  ( -- )                         
+  1000    0 1000      INPUT ENTER       
+  1000    0    0 1000 TIER  ENTER       
+  1000                GOAL  ENTER ;     
+                                        
+: CASE4  ( -- )                         
+  1000 1000 1000      INPUT ENTER       
+  1000 1000    0 1000 TIER  ENTER       
+     0                GOAL  ENTER ;     
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 034
+(                        <12/13/86>174) 
+                                        
+: OTWEAK  ( -- )                        
+   \ Correct weights of level 2 units   
+   TIER OERROR 2TEMP OUTPROD            
+   LRATE 2TEMP SCA*                     
+   2WEIGHT 2TEMP MAT- ;                 
+                                        
+                                        
+: HTWEAK  ( -- )                        
+   \ Correct weights of level 2 units   
+   0 2 2WEIGHT MAT@                     
+   0 0 OERROR  MAT@ 1000 */             
+   0 0 HERROR  MAT!                     
+   INPUT HERROR 1TEMP OUTPROD           
+   LRATE 1TEMP SCA*                     
+   1WEIGHT 1TEMP MAT- ;                 
+                                        
+: <PROPAGATE                            
+    OTWEAK HTWEAK ;                     
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 035
+(                        <12/13/86>175) 
+                                        
+: REVIEW                                
+  0 0 OUTPUT MAT@ 5 .R  ;               
+\ CR ." OUTPUT:  " OUTPUT .MAT          
+\ CR ." HERROR:  " HERROR .MAT          
+\ CR ." OERROR:  " OERROR .MAT ;        
+                                        
+: TRIAL                                 
+  ACTIVATE                              
+  REVIEW                                
+  <PROPAGATE ;                          
+                                        
+: TRAIN                                 
+   REVIEW                               
+   30 0 DO                              
+          0 0 ODELTA MAT@ ABS 100 >     
+          IF ACTIVATE <PROPAGATE        
+          ELSE LEAVE                    
+          THEN                          
+        LOOP ;                          
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 036
+(                        <12/13/86>176) 
+                                        
+: .ERROR                                
+   0                                    
+   4 0 DO I 0 ERRORS MAT@               
+          DUP 1000 */ +                 
+       LOOP                             
+       5 .R ;                           
+    \  ." ERROR: " 5 .R ;               
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 037
+(                        <12/13/86>177) 
+                                        
+: RUN                                   
+  1WEIGHT MATRND  2WEIGHT MATRND        
+  1000 0 DO                             
+   CASE1 ACTIVATE                       
+   0 0 OERROR MAT@                      
+   0 0 ERRORS MAT! OUTPUT .MAT TRAIN    
+   CASE2 ACTIVATE                       
+   0 0 OERROR MAT@                      
+   1 0 ERRORS MAT! OUTPUT .MAT TRAIN    
+   CASE3 ACTIVATE                       
+   0 0 OERROR MAT@                      
+   2 0 ERRORS MAT! OUTPUT .MAT TRAIN    
+   CASE4 ACTIVATE                       
+   0 0 OERROR MAT@                      
+   3 0 ERRORS MAT! OUTPUT .MAT TRAIN    
+   CR .ERROR                            
+   CR                                   
+  LOOP ;                                
+                                        
+EXIT                                    
+                                        
+                                        
+-------------------------------------------- SCREEN 038
+(                        <12/13/86>178) 
+                                        
+: NEWNET                                
+  1WEIGHT MATRND  2WEIGHT MATRND ;      
+                                        
+: RUN1                                  
+  CR                                    
+  1000 0 DO                             
+   CASE1 ACTIVATE                       
+   0 0 OERROR MAT@ 0 0 ERRORS MAT!      
+   TRAIN                                
+   CASE2 ACTIVATE                       
+   0 0 OERROR MAT@ 1 0 ERRORS MAT!      
+   TRAIN                                
+   CASE3 ACTIVATE                       
+   0 0 OERROR MAT@ 2 0 ERRORS MAT!      
+   TRAIN                                
+   CASE4 ACTIVATE                       
+   0 0 OERROR MAT@ 3 0 ERRORS MAT!      
+   TRAIN                                
+   .ERROR                               
+   CR                                   
+  LOOP ;                                
+                                        
+-------------------------------------------- SCREEN 040
+(                        <12/13/86>156) 
+                                        
+: IN-PROD  ( adrw adri adro r c -- )    
+   \ Store inner product of row r       
+   \ of matrix w with column c of       
+   \ matrix i in column c of matrix o   
+   TO COLUMN TO ROW                     
+   TO ADRV TO ADRU TO ADRW              
+   ADRW SIZE DROP                       
+   0 DO  ROW I      ADRW MAT@           
+         I   COLUMN ADRU MAT@           
+         1000 */                        
+         ROW COLUMN ADRV MAT+!          
+     LOOP ;                             
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 041
+(                        <12/13/86>157) 
+                                        
+: MAT* ( adrw adru adrv -- )            
+   \ Multiply matrix w by matrix u      
+   \ and store result in matrix v.      
+   \ v must have same number of rows    
+   \ as w and same number of columns    
+   \ as u.                              
+   DUP MAT0                             
+   TO ADRV TO ADRU TO ADRW              
+   ADRU SIZE DROP                       
+   0 DO                                 
+      I TO COLUMN                       
+      ADRW SIZE SWAP DROP               
+      0 DO                              
+         I TO ROW                       
+         ADRW ADRU ADRV ROW COLUMN      
+         IN-PROD                        
+        LOOP                            
+     LOOP ;                             
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 048
+(                        <12/13/86>188) 
+                                        
+CREATE MASKS 8 ALLOT                    
+                                        
+2 BASE !                                
+                                        
+10000000 CONSTANT CMASK                 
+                                        
+CREATE +MASKS  00000011 C, 00001100 C,  
+   00110000 C, 01000000 C, 00000110 C,  
+   00011000 C, 01100000 C, 00000001 C,  
+                                        
+CREATE -MASKS  11111100 C, 11110011 C,  
+   11001111 C, 10111111 C, 11111001 C,  
+   11100111 C, 10011111 C, 11111110 C,  
+                                        
+DECIMAL                                 
+                                        
+: .ON                                   
+    +MASKS MASKS 8 CMOVE ;              
+                                        
+: .OFF                                  
+    -MASKS MASKS 8 CMOVE ;              
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 049
+(                        <12/13/86>189) 
+                                        
+.ON                                     
+                                        
+: MASK  ( mod -- byte )                 
+   \ Return correct mask                
+   MASKS + C@ ;                         
+                                        
+: 3'MASK ( -- b )                       
+   7 MASK ;                             
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 050
+(                        <12/13/86>190) 
+                                        
+: ?BIT ( byte mask -- f )               
+   AND 0> ;                             
+                                        
+: BITADR  ( x y -- adr pix# )           
+   \ Return address o pixel x y in      
+   \ Apple II hires page 1.             
+   YADDR                                
+   OVER 7 /MOD 2* SWAP 3 > + +          
+   SWAP 7 MOD ;                         
+                                        
+: ?DOT ( x y -- f )                     
+   \ Is pixel set?                      
+   BITADR                               
+   DUP 3 =                              
+   IF   OVER 1+ C@ 3'MASK ?BIT          
+        ROT C@ ROT MASK   ?BIT OR       
+   ELSE SWAP C@ SWAP MASK ?BIT          
+   THEN ;                               
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 051
+(                        <12/13/86>191) 
+                                        
+: DOT ( x y -- )                        
+   \ Turn on pixel x y                  
+   BITADR                               
+   DUP 3 =                              
+   IF OVER 1+ DUP C@ 3'MASK OR SWAP C!  
+   THEN                                 
+   MASK OVER C@ OR SWAP C! ;            
+                                        
+: -DOT ( x y -- )                       
+   .OFF                                 
+   BITADR                               
+   DUP 3 =                              
+   IF OVER 1+ DUP C@ 3'MASK AND         
+      SWAP C!                           
+   THEN                                 
+   MASK OVER C@ AND SWAP C!             
+   .ON                                  
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 052
+(                        <12/13/86>192) 
+                                        
+: HLINE  ( x y w -- )                   
+   \ Draw horizontal line w wide        
+   \ starting at x y                    
+   0 DO OVER I + OVER DOT               
+     LOOP DDROP ;                       
+                                        
+: BOX   ( x y w d -- )                  
+   \ Draw a box                         
+   0 DO   3 PICK 3 PICK I + 3 PICK      
+          HLINE                         
+     LOOP DDROP DROP ;                  
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 053
+(                        <12/13/86>193) 
+                                        
+140 CONSTANT SCRNX                      
+192 CONSTANT SCRNY                      
+                                        
+VARIABLE X                              
+VARIABLE Y                              
+                                        
+0 X !  0 Y !                            
+                                        
+: CURSOR ( -- x y )                     
+   X @ Y @ ;                            
+                                        
+: Y+ ( -- )                             
+   Y @ SCRNY < IF 1 Y +! THEN ;         
+                                        
+: Y- ( -- )                             
+   Y @ 0 > IF -1 Y +! THEN ;            
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 054
+(                        <12/13/86>194) 
+                                        
+: X+ ( -- )                             
+   X @ SCRNX <                          
+   IF   1 X +!                          
+   ELSE 0 X !  Y+                       
+   THEN ;                               
+                                        
+: X- ( -- )                             
+   X @ 0 >                              
+   IF   -1 X +!                         
+   ELSE SCRNY 1- X ! Y-                 
+   THEN ;                               
+                                        
+: .CURS  ( -- )                         
+   X @ Y @ 2 3 BOX ;                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 055
+(                        <12/13/86>195) 
+                                        
+: KEYIN  ( -- )                         
+   BEGIN                                
+    KEY DUP 81 = NOT                    
+   WHILE                                
+    -DOT                                
+    DUP  8 = IF X-    ELSE              
+    DUP 11 = IF Y-    ELSE              
+    DUP 10 = IF Y+    ELSE              
+    DUP 21 = IF X+    ELSE              
+                BEEP                    
+             THEN THEN THEN THEN        
+             DROP .CURS                 
+   REPEAT DROP ;                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 058
+(                        <12/13/86>198) 
+                                        
+16384 CONSTANT +1                       
+                                        
+: *. ( n n -- n ) +1 */ ;               
+: /. ( n n -- n ) +1 SWAP */ ;          
+: D->F ( d -- fraction) DROP 10000 /. ; 
+: #.#### DUP ABS 0                      
+         <# # # # # 46 HOLD # SIGN #>   
+         TYPE SPACE ;                   
+: .F ( fraction) 10000 *. #.#### ;      
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 059
+(                        <12/13/86>199) 
+                                        
+: WALL ;                                
+                                        
+VARIABLE RND                            
+                                        
+HERE RND !                              
+                                        
+: RANDOM RND @ 31421 * 6927 +           
+         DUP RND ! ;                    
+: CHOOSE ( u1 -- u2 )                   
+    RANDOM U* SWAP DROP ;               
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 060
+(                        <12/13/86>200) 
+                                        
+32 CONSTANT INPUTS                      
+                                        
+INPUTS 2* CONSTANT IVECTOR              
+                                        
+32 CONSTANT AXONS                       
+                                        
+AXONS 2* CONSTANT WVECTOR               
+                                        
+CREATE WEIGHTS WVECTOR ALLOT            
+                                        
+VARIABLE FREEWEIGHT                     
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 061
+(                        <12/13/86>201) 
+                                        
+: 0WEIGHTS  ( -- )                      
+   WEIGHTS WVECTOR 0 FILL ;             
+                                        
+: BIRTH  ( -- )                         
+   0WEIGHTS                             
+   WEIGHTS FREEWEIGHT ! ;               
+                                        
+BIRTH                                   
+                                        
+: CONSUME  ( n -- )                     
+   2* FREEWEIGHT +! ;                   
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 062
+(                        <12/13/86>201) 
+                                        
+: ACTIVATE ( i1 ... in adr c -- n )     
+    0 SWAP                              
+    0 DO OVER I 2* + @                  
+      >R ROT R> * +                     
+      LOOP SWAP DROP ;                  
+                                        
+: NEURON                                
+    CREATE DUP , FREEWEIGHT @ ,         
+           CONSUME                      
+    DOES>  D@ ACTIVATE ;                
+                                        
+  2 NEURON BEE                          
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 090
+( NEURON1                <12/13/86>150) 
+                                        
+                                        
+: MATRIX  ( defining: r c -- )          
+    CREATE                              
+     DDUP , , * 2*                      
+     HERE OVER 0 FILL                   
+     ALLOT                              
+    DOES> ;                             
+                                        
+: ?BOUNDS  ( r c adr -- )               
+    DDUP @ < NOT                        
+    ABORT" Column index out of bounds"  
+    SWAP DROP                           
+         @ < NOT                        
+    ABORT" Row index out of bounds" ;   
+                                        
+: <MAT>  ( r c adr -- adr )             
+   >R DDUP R@ ?BOUNDS R>                
+   DUP >R D@ SWAP DROP                  
+   2* ROT * SWAP 2* +                   
+   R> + 4 + ;                           
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 107
+(                        <12/13/86>247) 
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 108
+(                        <12/13/86>248) 
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+-------------------------------------------- SCREEN 109
+( Neural breadboard      <12/13/86>249) 
+                                        
+                                        
+: MAXUNITS  ( n -- n )                  
+   DUP DUP 1+ * SWAP 1+ 3 * + 2* ;      
+                                        
+32 MAXUNITS CONSTANT MAXSPACE           
+                                        
+CREATE NETSPACE MAXSPACE ALLOT          
+                                        
+: CLEAR ( -- )                          
+   NETSPACE MAXSPACE 0 FILL ;           
+                                        
+0 CONSTANT WEIGHTS                      
+                                        
+  NETSPACE TO WEIGHTS                   
+                                        
+500 CONSTANT WEIGHTLIM                  
+\ Limit for randomly generated weights  
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 110
+( Neural net breadboard  <12/13/86>250) 
+                                        
+0 CONSTANT OUTPUTS                      
+0 CONSTANT ACTIVES                      
+0 CONSTANT ERRORS                       
+                                        
+0 CONSTANT UNITS                        
+0 CONSTANT IN-UNITS                     
+0 CONSTANT OUT-UNITS                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 111
+(                        <12/13/86>251) 
+                                        
+: WEIGHTSIZE   ( -- n )                 
+   UNITS DUP 1+ * 2* ;                  
+                                        
+: VECTORSIZE   ( -- n )                 
+   UNITS 1+ 2* ;                        
+                                        
+: <WEIGHT> ( r c -- adr)                
+    2* UNITS 1+ 2* ROT * + WEIGHTS + ;  
+                                        
+: !WEIGHT ( val r c -- )                
+    <WEIGHT> ! ;                        
+                                        
+: +!WEIGHT ( val r c -- )               
+    <WEIGHT> +! ;                       
+                                        
+: @WEIGHT  ( r c -- val )               
+    <WEIGHT> @ ;                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 112
+(                        <12/13/86>252) 
+                                        
+: !ACTIVE  ( val n -- )                 
+    2* ACTIVES + ! ;                    
+                                        
+: +!ACTIVE  ( val n -- )                
+    2* ACTIVES + +! ;                   
+                                        
+: @ACTIVE  ( val -- n )                 
+    2* ACTIVES + @ ;                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 113
+(                        <12/13/86>253) 
+                                        
+: !OUTPUT  ( val n -- )                 
+    2* OUTPUTS + ! ;                    
+                                        
+: @OUTPUT  ( val -- n )                 
+    2* OUTPUTS + @ ;                    
+                                        
+: !ERROR   ( val n -- )                 
+    2* ERRORS  + ! ;                    
+                                        
+: +!ERROR   ( val n -- )                
+    2* ERRORS  + +! ;                   
+                                        
+: @ERROR   ( val -- n )                 
+    2* ERRORS  + @ ;                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 114
+(                        <12/13/86>254) 
+                                        
+: INC-ACT   ( -- )                      
+   \ Increment ACTIVE vector to 0       
+   UNITS 1+ 0                           
+   DO 0 I !ACTIVE                       
+   LOOP ;                               
+                                        
+: INC-OUT   ( -- )                      
+   \ Increment OUTPUT vector to 0       
+   UNITS 1+ 0                           
+   DO 0 I !OUTPUT                       
+   LOOP ;                               
+                                        
+: INC-ERR   ( -- )                      
+   \ Increment error vector to 0        
+   UNITS 1+ 0                           
+   DO 0 I !ERROR                        
+   LOOP ;                               
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 115
+(                        <12/13/86>255) 
+                                        
+: GEN-WEIGHT  ( -- n )                  
+   \ Generate random weight             
+   WEIGHTLIM CHOOSE                     
+   2 CHOOSE IF NEGATE THEN ;            
+                                        
+: BREAKSYM ( -- )                       
+   \ Initialize weight matrix with      
+   \ random values to break symmetry    
+   UNITS 0 DO I                         
+    UNITS 1+ 0 DO DUP I DDUP =          
+                  IF 0                  
+                  ELSE GEN-WEIGHT       
+                  THEN                  
+                  ROT ROT <WEIGHT> !    
+               LOOP                     
+           LOOP DROP ;                  
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 116
+(                        <12/13/86>256) 
+                                        
+: ENTER ( n1 ... nn -- )                
+   \ Enter input values                 
+   UNITS 0 DO 0 I !OUTPUT               
+           LOOP                         
+   IN-UNITS                             
+   DUP 0 DO  1- SWAP                    
+             OVER !OUTPUT               
+         LOOP DROP ;                    
+                                        
+1000 1000 ENTER                         
+                                        
+: CONNECTS ( s d -- )                   
+   \ Enter random weight between        
+   \ source unit and destination        
+   \ unit                               
+   SWAP GEN-WEIGHT                      
+   ROT ROT !WEIGHT ;                    
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 117
+(                        <12/13/86>257) 
+                                        
+: NEWNET  ( #units -- )                 
+   \ Define new neural net system       
+   CLEAR                                
+   NETSPACE TO WEIGHTS                  
+   WEIGHTSIZE  WEIGHTS + TO OUTPUTS     
+   VECTORSIZE  OUTPUTS + TO ACTIVES     
+   VECTORSIZE  ACTIVES + TO ERRORS      
+   UNITS IN-UNITS                       
+   DO  GEN-WEIGHT                       
+       I UNITS !WEIGHT                  
+   LOOP                                 
+   1000 UNITS  2* OUTPUTS + !  ;        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 118
+(                        <12/13/86>258) 
+                                        
+\ Here's how to define a new system     
+                                        
+4 TO UNITS                              
+2 TO IN-UNITS                           
+1 TO OUT-UNITS                          
+  NEWNET                                
+                                        
+0 2 CONNECTS                            
+0 3 CONNECTS                            
+1 2 CONNECTS                            
+1 3 CONNECTS                            
+2 3 CONNECTS                            
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 119
+(                        <12/13/86>259) 
+                                        
+: .WEIGHTS  ( -- )                      
+   CR UNITS 0                           
+   DO UNITS 1+ 0                        
+     DO J I @WEIGHT 5 .R                
+     LOOP  CR                           
+   LOOP ;                               
+                                        
+: .ACTIVE   ( -- )                      
+   CR UNITS 1+ 0 DO I @ACTIVE 5 .R      
+                 LOOP ;                 
+                                        
+: .OUTPUT   ( -- )                      
+   CR UNITS 1+ 0 DO I @OUTPUT 5 .R      
+                 LOOP ;                 
+                                        
+: .ERROR    ( -- )                      
+   CR UNITS 1+ 0 DO I @ERROR  5 .R      
+                 LOOP ;                 
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 120
+(                        <12/13/86>260) 
+                                        
+Next step is to write o = f(a),         
+a = Wo.                                 
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 121
+(                        <12/13/86>261) 
+                                        
+\ Output function -- transform          
+\ linear activation value to sigmoid    
+\ value between 0 and 1                 
+                                        
+CREATE OTAB1 500 , 487 , 475 , 463 ,    
+             450 , 438 , 426 , 413 ,    
+             401 , 389 , 378 , 366 ,    
+             354 , 343 , 332 , 321 ,    
+             310 , 299 , 289 , 279 ,    
+                                        
+CREATE OTAB2 269 , 250 , 231 , 214 ,    
+             198 , 179 , 168 , 154 ,    
+             142 , 130 , 119 , 109 ,    
+             100 ,  91 ,  83 ,  76 ,    
+              69 ,  63 ,  57 ,  52 ,    
+              47 ,  43 ,  39 ,  36 ,    
+              32 ,  29 ,  27 ,  24 ,    
+              21 ,  20 ,  18 ,  16 ,    
+              15 ,  13 ,  12 ,  11 ,    
+              10 ,   9 ,   8 ,   7 ,    
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 122
+(                        <12/13/86>262) 
+                                        
+: @VAL1  ( n1 -- n2 )                   
+    \ Assumes n1 is between 0 and 100   
+    5 /MOD 2* OTAB1 +                   
+    OVER 5 < NOT                        
+    IF 2+ THEN @                        
+    SWAP 23 * 10 / - ;                  
+                                        
+                                        
+: @VAL2  ( n1 -- n2 )                   
+    \ Assumes n1 between 100 and 500    
+    225 MIN 100 -                       
+    10 /MOD 2* OTAB2 + @                
+    SWAP OVER 12 / * 10 / - ;           
+                                        
+: @VAL3  ( n1 -- n3 )                   
+    \ Assumes n1 if greater than 500    
+    650 MIN 800 SWAP -                  
+    DUP DUP 10 */ SWAP 6 *              
+    - 1000 / ;                          
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 123
+(                        <12/13/86>263) 
+                                        
+: @VAL  ( n1 -- n2 )                    
+   DUP ABS                              
+       DUP 100 < IF   @VAL1             
+                 ELSE @VAL2             
+                 THEN                   
+       SWAP 0< IF 1000 SWAP - THEN ;    
+                                        
+EXIT                                    
+                                        
+       DUP 500 < IF @VAL2  ELSE         
+                    @VAL3               
+                 THEN THEN              
+       SWAP 0< IF 1000 SWAP - THEN ;    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 124
+(                        <12/13/86>264) 
+                                        
+: >OUTPUT  ( -- )                       
+    \ o - f(a)                          
+    UNITS IN-UNITS                      
+    DO I @ACTIVE @VAL                   
+       I !OUTPUT                        
+    LOOP ;                              
+                                        
+: ACTIVATE  ( -- )                      
+    \ a = Wo                            
+    INC-ACT                             
+    UNITS 0 DO  I UNITS 1+ 0            
+             DO DUP I @WEIGHT           
+              I @OUTPUT 1000 */         
+              OVER +!ACTIVE             
+             LOOP DROP                  
+            LOOP                        
+            >OUTPUT ;                   
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 125
+(                        <12/13/86>265) 
+                                        
+                                        
+EXIT                                    
+                                        
+Compute delta                           
+Store delta                             
+Compute wdelta                          
+Change weight                           
+Compute Sum(delta weight)               
+Add to feeder unit                      
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 126
+(                        <12/13/86>266) 
+                                        
+\ CREATE TRAIN 100 , 100 , 100 ,        
+\              100 , 900 , 900 ,        
+\              900 , 100 , 900 ,        
+\              900 , 900 , 100 ,        
+                                        
+CREATE TRAIN    0 ,    0 ,    0 ,       
+                0 , 1000 , 1000 ,       
+             1000 ,    0 , 1000 ,       
+             1000 , 1000 ,    0 ,       
+                                        
+                                        
+: @T-IN  ( n -- n n )                   
+   6 * TRAIN + D@ ;                     
+                                        
+: @T-OUT ( n -- n )                     
+   6 * TRAIN + 4 + @ ;                  
+                                        
+: LOADUP ( n -- )                       
+   INC-OUT                              
+   @T-IN 0 !OUTPUT                      
+         1 !OUTPUT                      
+   1000  4 !OUTPUT ;                    
+-------------------------------------------- SCREEN 127
+(                        <12/13/86>267) 
+                                        
+: TRIAL  ( n -- )                       
+   LOADUP ACTIVATE  ;                   
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 128
+(                        <12/13/86>268) 
+                                        
+250 CONSTANT LRATE                      
+                                        
+\ Compute and store OERROR for all      
+\ output units                          
+                                        
+: FPRIME ( n1 -- n2 )                   
+   \ Opj(1 - Opj)                       
+   DUP 1000 SWAP - 1000 */ ;            
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 129
+(                        <12/13/86>269) 
+                                        
+: OERROR ( t o -- d )                   
+   \ (Tpj - Opj)Opj(1 - Opj)            
+   DUP >R - R> FPRIME 1000 */ ;         
+                                        
+: !OERRORS  ( n -- )                    
+   \ Compute errors for all output      
+   \ units                              
+   @T-OUT 3 @OUTPUT OERROR              
+          3 !ERROR ;                    
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 130
+(                        <12/13/86>270) 
+                                        
+: >PROPAGATE ( n -- )                   
+   \ Propagate errors back to hidden    
+   \ units                              
+   \ E = SUM(d(pk)w(kj))                
+   UNITS 1+ 0                           
+   DO DUP @ERROR OVER I @WEIGHT         
+      1000 */ I +!ERROR                 
+   LOOP DROP ;                          
+                                        
+: HERROR   ( n -- )                     
+   \ Compute error for hidden units     
+   \ d(pj)=f'(j)(net(pj))E              
+   DUP @OUTPUT FPRIME                   
+   OVER @ERROR  1000 */                 
+   SWAP !ERROR ;                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 131
+(                        <12/13/86>271) 
+                                        
+\ Compute wdelta and change weights for 
+\ all output units                      
+                                        
+: WDELTA ( r c -- )                     
+   DDUP =                               
+   IF                                   
+     DDROP                              
+   ELSE                                 
+     DDUP                               
+     @OUTPUT                            
+     SWAP @ERROR 1000 */                
+     LRATE       1000 */ NEGATE         
+     ROT ROT +!WEIGHT                   
+   THEN ;                               
+                                        
+: TWEAK ( r -- )                        
+   \ Tweak weights for unit r           
+   DUP 0                                
+   DO  DUP I WDELTA                     
+   LOOP                                 
+   UNITS WDELTA ;                       
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 132
+(                        <12/13/86>272) 
+                                        
+\ : TWEAK ( r -- )                      
+\   \ Tweak weights for unit r          
+\   UNITS 1+ 0                          
+\   DO  DUP I WDELTA                    
+\   LOOP DROP ;                         
+                                        
+\ Compute errors for all output         
+\ units                                 
+\ Tweak all output units                
+\ Propagate errors back for all         
+\ output units                          
+                                        
+: OTEACH ( n -- )                       
+   !OERRORS                             
+   UNITS UNITS OUT-UNITS -              
+   DO I TWEAK                           
+      I >PROPAGATE                      
+   LOOP ;                               
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 133
+(                        <12/13/86>273) 
+                                        
+\ Compute errors for all hidden units   
+\ Tweak all hidden units                
+\ Propagate back errors                 
+                                        
+: HTEACH ( -- )                         
+   UNITS OUT-UNITS -                    
+   BEGIN                                
+    DUP IN-UNITS -                      
+   WHILE                                
+    1-                                  
+    DUP  HERROR                         
+    DUP  TWEAK                          
+    DUP  >PROPAGATE                     
+   REPEAT                               
+   DROP ;                               
+                                        
+: TEACH  ( n -- )                       
+   INC-ERR OTEACH HTEACH ;              
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 134
+(                        <12/13/86>274) 
+                                        
+: SUM-ERRS ( -- . )                     
+   0                                    
+   UNITS 0                              
+   DO                                   
+    I @ERROR ABS +                      
+   LOOP ;                               
+                                        
+: SHOW                                  
+   CR                                   
+   CR ." OUTPUT: " .OUTPUT              
+   CR                                   
+   CR ." WEIGHTS:" .WEIGHTS             
+   CR ." ACTIVE: " .ACTIVE              
+   CR                                   
+   CR ." ERROR: " .ERROR                
+   CR                                   
+   CR ." SUM-ERRS:" SUM-ERRS 5 .R       
+   CR ;                                 
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 135
+(                        <12/13/86>275) 
+                                        
+0 CONSTANT SCORE                        
+                                        
+0 CONSTANT CYCLE                        
+                                        
+: RUN1  ( n -- )                        
+   100 0 DO DUP TRIAL                   
+            DUP TEACH                   
+            PAGE                        
+            ." CYCLE: " CYCLE 5 .R      
+            SHOW                        
+            3 @ERROR ABS 10 <           
+            IF SCORE I + TO SCORE       
+               LEAVE                    
+            THEN                        
+         LOOP DROP ;                    
+                                        
+  : RUN ( -- n )                        
+     4 0 DO                             
+            I RUN1                      
+         LOOP ;                         
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 136
+(                        <12/13/86>276) 
+                                        
+: SERIES ( -- )                         
+   0 TO CYCLE                           
+   CR                                   
+   10000 0 DO I TO CYCLE                
+              0 TO SCORE                
+              CR RUN                    
+              SCORE 0 =                 
+              IF I TO SCORE             
+                 LEAVE                  
+              THEN                      
+           LOOP ;                       
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 137
+(                        <12/13/86>277) 
+                                        
+                                        
+NEWNET                                  
+                                        
+0 2 CONNECTS                            
+0 3 CONNECTS                            
+1 2 CONNECTS                            
+1 3 CONNECTS                            
+2 3 CONNECTS                            
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 138
+(                        <12/13/86>278) 
+                                        
+500   3 4 !WEIGHT                       
+-1500 2 4 !WEIGHT                       
+1000  3 0 !WEIGHT                       
+1000  3 1 !WEIGHT                       
+-2000 3 2 !WEIGHT                       
+1000  2 0 !WEIGHT                       
+1000  2 1 !WEIGHT                       
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 139
+(                        <12/13/86>252) 
+                                        
+: INC-ACT   ( -- )                      
+   \ Increment ACTIVE vector to 0       
+   UNITS 1+ 0                           
+   DO 0 I !ACTIVE                       
+   LOOP ;                               
+                                        
+: INC-OUT   ( -- )                      
+   \ Increment OUTPUT vector to 0       
+   UNITS 1+ 0                           
+   DO 0 I !OUTPUT                       
+   LOOP ;                               
+                                        
+: INC-ERR   ( -- )                      
+   \ Increment error vector to 0        
+   UNITS 1+ 0                           
+   DO 0 I !ERROR                        
+   LOOP ;                               
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 

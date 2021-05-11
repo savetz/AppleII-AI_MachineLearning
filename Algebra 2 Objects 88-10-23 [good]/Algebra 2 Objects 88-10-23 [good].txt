@@ -1,0 +1,175 @@
+-------------------------------------------- SCREEN 010
+(                        <12/13/86>150) 
+                                        
+: ACTION ( obj msg -- )                 
+   SWAP 6 +                             
+   BEGIN                                
+    @ DDUP 2+ @ =                       
+   UNTIL 4 + SWAP DROP EXECUTE ;        
+                                        
+VARIABLE 'MSG                           
+VARIABLE 'OBJECT                        
+                                        
+: ACT ( pfa msg -- )                    
+   DDUP 'MSG @ ! 'OBJECT ! ;            
+                                        
+: ME ( -- ?? )                          
+   'OBJECT @ ;                          
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 011
+(                        <12/13/86>151) 
+                                        
+: >OBJECT ( rel-addr -- addr )          
+   ME + ;                               
+                                        
+: >SUPER ( rel-addr -- addr )           
+   ME @ + ;                             
+                                        
+: LINK, ( addr -- )                     
+   HERE OVER @ , SWAP ! ;               
+                                        
+: OBJECT>  ( -- )                       
+   'OBJECT LINK,                        
+   0 ,                                  
+   2 >SUPER LINK,                       
+   6 >SUPER @ , ;                       
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 012
+(                        <12/13/86>152) 
+                                        
+CREATE MASTER                           
+  MASTER 'OBJECT !                      
+  OBJECT>                               
+  2 >OBJECT 6 0 FILL                    
+                                        
+: <METHOD> ( -- msg )                   
+    CREATE HERE DOES> ACT ;             
+                                        
+: ?CREATE  ( -- msg )                   
+    >IN @ BL WORD FIND                  
+    IF   SWAP DROP PFA                  
+    ELSE DROP >IN ! <METHOD>            
+    THEN ;                              
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 013
+(                        <12/13/86>153) 
+                                        
+: <METHOD:>  ( -- )                     
+   ?CREATE                              
+   6 >OBJECT LINK, ,                    
+   [ ' : @ ] LITERAL , SP@ CSP ! ] ;    
+                                        
+<METHOD:> ANCHOR ." I don't understand" 
+  ;                                     
+                                        
+' ANCHOR PFA 2+ 'MSG ! ;                
+                                        
+<METHOD:> METHOD:  ( -- )               
+  <METHOD:> ;                           
+                                        
+MASTER METHOD: OBJECT: ( -- )           
+  CREATE OBJECT> ;                      
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 014
+(                        <12/13/86>154) 
+                                        
+.METHOD < link -- )                     
+  CR DUP 6 U.R DUP @ 6 U.R              
+  2+ @ DUP 6 U.R 2 SPACES PFA           
+  >NAME .ID ;                           
+                                        
+MASTER METHOD: .METHODS ( -- )          
+  BASE@ HEX 6 >OBJECT                   
+  BEGIN @ ?DUP WHILE DUP .METHOD REPEAT 
+  BASE ! ;                              
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 015
+(                        <12/13/86>155) 
+                                        
+: .ME ( n -- )                          
+  CR SPACES ME BODY> >NAME .ID ;        
+                                        
+MASTER MEHOD: <.SONS>  ( n -- )         
+  DUP .ME 2+ 2 >OBJECT                  
+  BEGIN @ DUP WHILE DDUP 4 - (.SONS)    
+  REPEAT DDROP ;                        
+                                        
+MASTER METHOD: .SONS ( -- )             
+  0 ME <.SONS> ;                        
+                                        
+MASTER METHOD: .ONE                     
+  4 .ME ;                               
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
+-------------------------------------------- SCREEN 016
+(                        <12/13/86>156) 
+                                        
+MASTER OBJECT: VEHICLE                  
+                                        
+VEHICLE METHOD: #WHEELS 8 >SUPER @ ;    
+                                        
+VEHICLE OBJECT: BOAT     0 ,            
+VEHICLE OBJECT: CAR      4 ,            
+VEHICLE OBJECT: TRICYCLE 3 ,            
+                                        
+CAR  OBJECT: GREEN-MONSTER              
+BOAT OBJECT: QUEEN-MARY                 
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                               ( LRP  ) 
